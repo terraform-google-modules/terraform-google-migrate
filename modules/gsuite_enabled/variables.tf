@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+variable "lien" {
+  description = "Add a lien on the project to prevent accidental deletion"
+  default     = "false"
+  type        = string
+}
+
 variable "random_project_id" {
   description = "Enables project random id generation. Mutually exclusive with project_id being non-empty."
   default     = "false"
@@ -52,8 +58,13 @@ variable "folder_id" {
 }
 
 variable "group_name" {
-  description = "A group to control the project by being assigned group_role (defaults to project editor)"
+  description = "A group to control the project by being assigned group_role - defaults to $${project_name}-editors"
   default     = ""
+}
+
+variable "create_group" {
+  description = "Whether to create the group or not"
+  default     = "false"
 }
 
 variable "group_role" {
@@ -61,20 +72,25 @@ variable "group_role" {
   default     = "roles/editor"
 }
 
-variable "sa_role" {
-  description = "A role to give the default Service Account for the project (defaults to none)"
+variable "sa_group" {
+  description = "A GSuite group to place the default Service Account for the project in"
   default     = ""
 }
 
-variable "apis_authority" {
-  description = "Toggles authoritative management of project services."
-  default     = "false"
+variable "sa_role" {
+  description = "A role to give the default Service Account for the project (defaults to none)"
+  default     = ""
 }
 
 variable "activate_apis" {
   description = "The list of apis to activate within the project"
   type        = list(string)
   default     = ["compute.googleapis.com"]
+}
+
+variable "apis_authority" {
+  description = "Toggles authoritative management of project services."
+  default     = "false"
 }
 
 variable "usage_bucket_name" {
@@ -89,11 +105,6 @@ variable "usage_bucket_prefix" {
 
 variable "credentials_path" {
   description = "Path to a service account credentials file with rights to run the Project Factory. If this file is absent Terraform will fall back to Application Default Credentials."
-  default     = ""
-}
-
-variable "impersonate_service_account" {
-  description = "An optional service account to impersonate. This cannot be used with credentials_path. If this service account is not specified and credentials_path is absent, the module will use Application Default Credentials."
   default     = ""
 }
 
@@ -121,18 +132,17 @@ variable "bucket_name" {
 
 variable "bucket_location" {
   description = "The location for a GCS bucket to create (optional)"
-  default     = "US"
+  default     = ""
+}
+
+variable "api_sa_group" {
+  description = "A GSuite group to place the Google APIs Service Account for the project in"
+  default     = ""
 }
 
 variable "auto_create_network" {
   description = "Create the default network"
   default     = "false"
-}
-
-variable "lien" {
-  description = "Add a lien on the project to prevent accidental deletion"
-  default     = "false"
-  type        = string
 }
 
 variable "disable_services_on_destroy" {
@@ -152,3 +162,4 @@ variable "disable_dependent_services" {
   default     = "true"
   type        = string
 }
+

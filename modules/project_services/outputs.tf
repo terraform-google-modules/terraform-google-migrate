@@ -1,6 +1,5 @@
-
 /**
- * Copyright 2019 Google LLC
+ * Copyright 2018 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +14,11 @@
  * limitations under the License.
  */
 
-terraform {
-  required_version = "~> 0.12.0"
+output "project_id" {
+  description = "The GCP project you want to enable APIs on"
+  value = element(
+    concat(google_project_service.project_services.*.project, [""]),
+    0,
+  )
 }
+

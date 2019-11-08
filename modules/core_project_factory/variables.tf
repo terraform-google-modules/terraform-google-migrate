@@ -14,6 +14,32 @@
  * limitations under the License.
  */
 
+variable "group_email" {
+  description = "The email address of a group to control the project by being assigned group_role."
+  default     = ""
+}
+
+variable "group_role" {
+  description = "The role to give the controlling group (group_name) over the project."
+  default     = ""
+}
+
+variable "lien" {
+  description = "Add a lien on the project to prevent accidental deletion"
+  default     = "false"
+  type        = string
+}
+
+variable "manage_group" {
+  description = "A toggle to indicate if a G Suite group should be managed."
+  default     = "false"
+}
+
+variable "project_id" {
+  description = "If provided, the project uses the given project ID. Mutually exclusive with random_project_id being true."
+  default     = ""
+}
+
 variable "random_project_id" {
   description = "Enables project random id generation. Mutually exclusive with project_id being non-empty."
   default     = "false"
@@ -23,18 +49,8 @@ variable "org_id" {
   description = "The organization ID."
 }
 
-variable "domain" {
-  description = "The domain name (optional)."
-  default     = ""
-}
-
 variable "name" {
   description = "The name for the project"
-}
-
-variable "project_id" {
-  description = "If provided, the project uses the given project ID. Mutually exclusive with random_project_id being true."
-  default     = ""
 }
 
 variable "shared_vpc" {
@@ -49,16 +65,6 @@ variable "billing_account" {
 variable "folder_id" {
   description = "The ID of a folder to host this project"
   default     = ""
-}
-
-variable "group_name" {
-  description = "A group to control the project by being assigned group_role (defaults to project editor)"
-  default     = ""
-}
-
-variable "group_role" {
-  description = "The role to give the controlling group (group_name) over the project (defaults to project editor)"
-  default     = "roles/editor"
 }
 
 variable "sa_role" {
@@ -93,7 +99,7 @@ variable "credentials_path" {
 }
 
 variable "impersonate_service_account" {
-  description = "An optional service account to impersonate. This cannot be used with credentials_path. If this service account is not specified and credentials_path is absent, the module will use Application Default Credentials."
+  description = "An optional service account to impersonate. If this service account is not specified, Terraform will fall back to credential file or Application Default Credentials."
   default     = ""
 }
 
@@ -129,12 +135,6 @@ variable "auto_create_network" {
   default     = "false"
 }
 
-variable "lien" {
-  description = "Add a lien on the project to prevent accidental deletion"
-  default     = "false"
-  type        = string
-}
-
 variable "disable_services_on_destroy" {
   description = "Whether project services will be disabled when the resources are destroyed"
   default     = "true"
@@ -152,3 +152,4 @@ variable "disable_dependent_services" {
   default     = "true"
   type        = string
 }
+
