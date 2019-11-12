@@ -22,21 +22,6 @@ locals {
 }
 
 ###############################################################################
-#                          Provider Configuration
-###############################################################################
-
-provider "google" {
-  credentials = file(local.credentials_file_path)
-  version     = "~> 2.7.0"
-}
-
-provider "google-beta" {
-  credentials = file(local.credentials_file_path)
-  version     = "~> 2.7.0"
-}
-
-
-###############################################################################
 #                          Networking (VPCs, Firewalls)
 ###############################################################################
 
@@ -45,14 +30,8 @@ provider "google-beta" {
  *****************************************/
 
 module "vpc" {
-  # TODO: Switch to released version once
-  # https://github.com/terraform-google-modules/terraform-google-network/pull/47
-  # is merged and released.  This is here to fix the `Error: Unsupported block
-  # type` on the `triggers` block in network's main.tf file.
-  #
-  # source  = "terraform-google-modules/network/google"
-  # version = "0.8.0"
-  source = "git::https://github.com/terraform-google-modules/terraform-google-network.git?ref=master"
+  source  = "terraform-google-modules/network/google"
+  version = "~> 1.4.3"
 
   project_id   = var.project_id
   network_name = var.network_name
@@ -75,7 +54,7 @@ module "vpc" {
     },
     {
       subnet_name           = local.subnet_03
-      subnet_ip             = var.subnet_03_ip 
+      subnet_ip             = var.subnet_03_ip
       subnet_region         = var.subnet_01_region
       subnet_private_access = "true"
       subnet_flow_logs      = "false"
@@ -141,13 +120,13 @@ resource "google_compute_firewall" "velos-ce-backend" {
 }
 
 resource "google_compute_firewall" "velos-ce-control" {
-  name          = "velos-ce-control"
-  description   = "Control plane between Cloud Extensions and Velostrata Manager"
-  network       = var.network_name
-  project       = var.project_id
-  source_tags   = ["fw-velosmanager"]
-  target_tags   = ["fw-velostrata"]
-  depends_on    = ["module.vpc"]
+  name        = "velos-ce-control"
+  description = "Control plane between Cloud Extensions and Velostrata Manager"
+  network     = var.network_name
+  project     = var.project_id
+  source_tags = ["fw-velosmanager"]
+  target_tags = ["fw-velostrata"]
+  depends_on  = ["module.vpc"]
 
   allow {
     protocol = "tcp"
@@ -156,13 +135,13 @@ resource "google_compute_firewall" "velos-ce-control" {
 }
 
 resource "google_compute_firewall" "velos-ce-cross" {
-  name          = "velos-ce-cross"
-  description   = "Synchronization between Cloud Extension nodes"
-  network       = var.network_name
-  project       = var.project_id
-  source_tags   = ["fw-velostrata"]
-  target_tags   = ["fw-velostrata"]
-  depends_on    = ["module.vpc"]
+  name        = "velos-ce-cross"
+  description = "Synchronization between Cloud Extension nodes"
+  network     = var.network_name
+  project     = var.project_id
+  source_tags = ["fw-velostrata"]
+  target_tags = ["fw-velostrata"]
+  depends_on  = ["module.vpc"]
 
   allow {
     protocol = "all"
@@ -170,13 +149,13 @@ resource "google_compute_firewall" "velos-ce-cross" {
 }
 
 resource "google_compute_firewall" "velos-console-probe" {
-  name          = "velos-console-probe"
-  description   = "Allows the Velostrata Manager to check if the SSH or RDP console on the migrated VM is available"
-  network       = var.network_name
-  project       = var.project_id
-  source_tags   = ["fw-velosmanager"]
-  target_tags   = ["fw-workload"]
-  depends_on    = ["module.vpc"]
+  name        = "velos-console-probe"
+  description = "Allows the Velostrata Manager to check if the SSH or RDP console on the migrated VM is available"
+  network     = var.network_name
+  project     = var.project_id
+  source_tags = ["fw-velosmanager"]
+  target_tags = ["fw-workload"]
+  depends_on  = ["module.vpc"]
 
   allow {
     protocol = "tcp"
@@ -280,84 +259,34 @@ resource "google_service_account" "velos-cloud-extension" {
 /******************************************
   Bind Roles to Service Accounts
  *****************************************/
-
-resource "google_project_iam_binding" "serviceAccountTokenCreator" {
+module "iam-bindings" {
+  source  = "terraform-google-modules/iam/google//modules/projects_iam"
+  version = "~> 4.0"
   project = var.project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-    members = [
-        "serviceAccount:velos-manager@${var.project_id}.iam.gserviceaccount.com"
+  mode    = "authoritative"
+  bindings = {
+    "roles/iam.serviceAccountTokenCreator" = [
+      "serviceAccount:${google_service_account.velos-manager.email}"
     ]
-  depends_on = ["google_service_account.velos-manager"]
-}
-
-resource "google_project_iam_binding" "serviceAccountUser" {
-  project = var.project_id
-  role    = "roles/iam.serviceAccountUser"
-    members = [
-        "serviceAccount:velos-manager@${var.project_id}.iam.gserviceaccount.com"
+    "roles/iam.serviceAccountUser" = [
+      "serviceAccount:${google_service_account.velos-manager.email}"
     ]
-  depends_on = ["google_service_account.velos-manager"]
-}
-
-resource "google_project_iam_binding" "logWriter" {
-  project = var.project_id
-  role    = "roles/logging.logWriter"
-    members = [
-        "serviceAccount:velos-manager@${var.project_id}.iam.gserviceaccount.com"
+    "roles/logging.logWriter" = [
+      "serviceAccount:${google_service_account.velos-manager.email}",
+      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
     ]
-  depends_on = ["google_service_account.velos-manager"]
-}
-
-resource "google_project_iam_binding" "metricWriter" {
-  project = var.project_id
-  role    = "roles/monitoring.metricWriter"
-    members = [
-        "serviceAccount:velos-manager@${var.project_id}.iam.gserviceaccount.com"
+    "roles/monitoring.metricWriter" = [
+      "serviceAccount:${google_service_account.velos-manager.email}",
+      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
     ]
-  depends_on = ["google_service_account.velos-manager"]
-}
-
-resource "google_project_iam_binding" "monitoring" {
-  project = var.project_id
-  role    = "roles/monitoring.viewer"
-    members = [
-        "serviceAccount:velos-manager@${var.project_id}.iam.gserviceaccount.com"
+    "roles/monitoring.viewer" = [
+      "serviceAccount:${google_service_account.velos-manager.email}"
     ]
-  depends_on = ["google_service_account.velos-manager"]
-}
-
-resource "google_project_iam_binding" "logWriter-ce" {
-  project = var.project_id
-  role    = "roles/logging.logWriter"
-    members = [
-        "serviceAccount:velos-cloud-extension@${var.project_id}.iam.gserviceaccount.com"
+    "projects/${var.project_id}/roles/velosMgmt" = [
+      "serviceAccount:${google_service_account.velos-manager.email}"
     ]
-  depends_on = ["google_service_account.velos-cloud-extension"]
-}
-
-resource "google_project_iam_binding" "metricWriter-ce" {
-  project = var.project_id
-  role    = "roles/monitoring.metricWriter"
-    members = [
-        "serviceAccount:velos-cloud-extension@${var.project_id}.iam.gserviceaccount.com"
+    "projects/${var.project_id}/roles/velosCe" = [
+      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
     ]
-  depends_on = ["google_service_account.velos-cloud-extension"]
-}
-
-resource "google_project_iam_binding" "velos_gcp_mgmt" {
-  project = var.project_id
-  role    = "projects/${var.project_id}/roles/velosMgmt"
-    members = [
-        "serviceAccount:velos-manager@${var.project_id}.iam.gserviceaccount.com"
-    ]
-  depends_on = ["google_service_account.velos-cloud-extension"]
-}
-
-resource "google_project_iam_binding" "velos_gcp_ce" {
-  project = var.project_id
-  role    = "projects/${var.project_id}/roles/velosCe"
-    members = [
-        "serviceAccount:velos-cloud-extension@${var.project_id}.iam.gserviceaccount.com"
-    ]
-  depends_on = ["google_service_account.velos-cloud-extension"]
+  }
 }

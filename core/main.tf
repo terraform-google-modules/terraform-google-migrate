@@ -19,34 +19,22 @@ locals {
 }
 
 ###############################################################################
-#                          Provider Configuration
-###############################################################################
-
-provider "google" {
-  credentials = file(local.credentials_file_path)
-  version     = "~> 2.1"
-}
-
-provider "google-beta" {
-  credentials = file(local.credentials_file_path)
-  version     = "~> 2.1"
-}
-
-###############################################################################
 #                          Project
 ###############################################################################
 
 module "project-factory" {
-  source                  = "../"
+  source                  = "terraform-google-modules/project-factory/google"
+  version                 = "~> 5.0"
   random_project_id       = "false"
   name                    = var.project_id
   org_id                  = var.organization_id
   billing_account         = var.billing_account
   credentials_path        = local.credentials_file_path
   default_service_account = var.default_service_account
+  folder_id               = var.folder_id
   #bucket_location         = "europe-west1"
   #bucket_name             = "terraform-state"
   #bucket_project          = var.project_id
   #auto_create_network     = "false"
-  activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
+  activate_apis = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }
