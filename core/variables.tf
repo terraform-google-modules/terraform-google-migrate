@@ -33,5 +33,11 @@ variable "default_service_account" {
 
 variable "project_id" {
   description = "Project ID for GCP project"
-  #default    = ""
+  default     = ""
+}
+
+variable "folder_id" {
+  description = "The ID of a folder to host this project"
+  type        = string
+  default     = ""
 }
