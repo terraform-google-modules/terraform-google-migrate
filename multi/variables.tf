@@ -110,3 +110,9 @@ variable "local_subnet_01_ip" {
   description = "IP range of the on-prem network"
   #default    = ""
 }
+
+variable "folder_id" {
+  description = "The ID of a folder to host this project"
+  type        = string
+  default     = ""
+}

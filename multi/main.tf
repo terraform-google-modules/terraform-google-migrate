@@ -19,27 +19,13 @@ locals {
 }
 
 ###############################################################################
-#                          Provider Configuration
-###############################################################################
-
-provider "google" {
-  credentials = file(local.credentials_file_path)
-  version     = "~> 2.7.0"
-}
-
-provider "google-beta" {
-  credentials = file(local.credentials_file_path)
-  version     = "~> 2.7.0"
-}
-
-###############################################################################
 #                          Networking (VPCs, Firewalls)
 ###############################################################################
 
 locals {
-  subnet_01             = "${var.network_name}-subnet-01"
-  subnet_02             = "${var.network_name}-subnet-02"
-  subnet_03             = "${var.network_name}-subnet-03"
+  subnet_01 = "${var.network_name}-subnet-01"
+  subnet_02 = "${var.network_name}-subnet-02"
+  subnet_03 = "${var.network_name}-subnet-03"
 }
 
 /******************************************
@@ -47,14 +33,8 @@ locals {
  *****************************************/
 
 module "vpc" {
-  # TODO: Switch to released version once
-  # https://github.com/terraform-google-modules/terraform-google-network/pull/47
-  # is merged and released.  This is here to fix the `Error: Unsupported block
-  # type` on the `triggers` block in network's main.tf file.
-  #
-  # source  = "terraform-google-modules/network/google"
-  # version = "0.8.0"
-  source = "git::https://github.com/terraform-google-modules/terraform-google-network.git?ref=master"
+  source  = "terraform-google-modules/network/google"
+  version = "~> 1.4.3"
 
   project_id   = var.vpc_project_id
   network_name = var.network_name
@@ -77,7 +57,7 @@ module "vpc" {
     },
     {
       subnet_name           = local.subnet_03
-      subnet_ip             = var.subnet_03_ip 
+      subnet_ip             = var.subnet_03_ip
       subnet_region         = var.subnet_03_region
       subnet_private_access = "true"
       subnet_flow_logs      = "true"
@@ -143,13 +123,13 @@ resource "google_compute_firewall" "velos-ce-backend" {
 }
 
 resource "google_compute_firewall" "velos-ce-control" {
-  name          = "velos-ce-control"
-  description   = "Control plane between Cloud Extensions and Velostrata Manager"
-  network       = var.network_name
-  project       = var.vpc_project_id
-  source_tags   = ["fw-velosmanager"]
-  target_tags   = ["fw-velostrata"]
-  depends_on    = ["module.vpc"]
+  name        = "velos-ce-control"
+  description = "Control plane between Cloud Extensions and Velostrata Manager"
+  network     = var.network_name
+  project     = var.vpc_project_id
+  source_tags = ["fw-velosmanager"]
+  target_tags = ["fw-velostrata"]
+  depends_on  = ["module.vpc"]
 
   allow {
     protocol = "tcp"
@@ -158,13 +138,13 @@ resource "google_compute_firewall" "velos-ce-control" {
 }
 
 resource "google_compute_firewall" "velos-ce-cross" {
-  name          = "velos-ce-cross"
-  description   = "Synchronization between Cloud Extension nodes"
-  network       = var.network_name
-  project       = var.vpc_project_id
-  source_tags   = ["fw-velostrata"]
-  target_tags   = ["fw-velostrata"]
-  depends_on    = ["module.vpc"]
+  name        = "velos-ce-cross"
+  description = "Synchronization between Cloud Extension nodes"
+  network     = var.network_name
+  project     = var.vpc_project_id
+  source_tags = ["fw-velostrata"]
+  target_tags = ["fw-velostrata"]
+  depends_on  = ["module.vpc"]
 
   allow {
     protocol = "all"
@@ -172,13 +152,13 @@ resource "google_compute_firewall" "velos-ce-cross" {
 }
 
 resource "google_compute_firewall" "velos-console-probe" {
-  name          = "velos-console-probe"
-  description   = "Allows the Velostrata Manager to check if the SSH or RDP console on the migrated VM is available"
-  network       = var.network_name
-  project       = var.vpc_project_id
-  source_tags   = ["fw-velosmanager"]
-  target_tags   = ["fw-workload"]
-  depends_on    = ["module.vpc"]
+  name        = "velos-console-probe"
+  description = "Allows the Velostrata Manager to check if the SSH or RDP console on the migrated VM is available"
+  network     = var.network_name
+  project     = var.vpc_project_id
+  source_tags = ["fw-velosmanager"]
+  target_tags = ["fw-workload"]
+  depends_on  = ["module.vpc"]
 
   allow {
     protocol = "tcp"
@@ -240,10 +220,12 @@ resource "google_compute_firewall" "velos-workload" {
 ###############################################################################
 
 module "velo-project" {
-  source                  = "../"
+  source                  = "terraform-google-modules/project-factory/google"
+  version                 = "~> 5.0"
   random_project_id       = "false"
   name                    = var.velo_project_id
   org_id                  = var.organization_id
+  folder_id               = var.folder_id
   billing_account         = var.billing_account
   credentials_path        = local.credentials_file_path
   default_service_account = var.default_service_account
@@ -257,10 +239,12 @@ module "velo-project" {
 }
 
 module "prod-project" {
-  source                  = "../"
+  source                  = "terraform-google-modules/project-factory/google"
+  version                 = "~> 5.0"
   random_project_id       = "false"
   name                    = var.prod_project_id
   org_id                  = var.organization_id
+  folder_id               = var.folder_id
   billing_account         = var.billing_account
   credentials_path        = local.credentials_file_path
   default_service_account = var.default_service_account
@@ -274,10 +258,12 @@ module "prod-project" {
 }
 
 module "stage-project" {
-  source                  = "../"
+  source                  = "terraform-google-modules/project-factory/google"
+  version                 = "~> 5.0"
   random_project_id       = "false"
   name                    = var.stage_project_id
   org_id                  = var.organization_id
+  folder_id               = var.folder_id
   billing_account         = var.billing_account
   credentials_path        = local.credentials_file_path
   default_service_account = var.default_service_account
@@ -291,10 +277,12 @@ module "stage-project" {
 }
 
 module "test-project" {
-  source                  = "../"
+  source                  = "terraform-google-modules/project-factory/google"
+  version                 = "~> 5.0"
   random_project_id       = "false"
   name                    = var.test_project_id
   org_id                  = var.organization_id
+  folder_id               = var.folder_id
   billing_account         = var.billing_account
   credentials_path        = local.credentials_file_path
   default_service_account = var.default_service_account
@@ -316,12 +304,12 @@ module "test-project" {
  *****************************************/
 
 resource "google_organization_iam_custom_role" "velos_gcp_mgmt_role" {
-  role_id          = "velosMgmt"
-  title            = "Velostrata Manager"
-  description      = "Velostrata Manager"
-  permissions      = ["compute.addresses.create", "compute.addresses.createInternal", "compute.addresses.delete", "compute.addresses.deleteInternal", "compute.addresses.get", "compute.addresses.list", "compute.addresses.setLabels", "compute.addresses.use", "compute.addresses.useInternal", "compute.diskTypes.get", "compute.diskTypes.list", "compute.disks.create", "compute.disks.delete", "compute.disks.get", "compute.disks.list", "compute.disks.setLabels", "compute.disks.update", "compute.disks.use", "compute.disks.useReadOnly", "compute.images.get", "compute.images.list", "compute.images.useReadOnly", "compute.instances.attachDisk", "compute.instances.create", "compute.instances.delete", "compute.instances.detachDisk", "compute.instances.get", "compute.instances.getSerialPortOutput", "compute.instances.list", "compute.instances.reset", "compute.instances.setDiskAutoDelete", "compute.instances.setLabels", "compute.instances.setMachineType", "compute.instances.setMetadata", "compute.instances.setMinCpuPlatform", "compute.instances.setScheduling", "compute.instances.setServiceAccount", "compute.instances.setTags", "compute.instances.start", "compute.instances.startWithEncryptionKey", "compute.instances.stop", "compute.instances.update", "compute.instances.updateNetworkInterface", "compute.instances.use", "compute.licenseCodes.get", "compute.licenseCodes.list", "compute.licenseCodes.update", "compute.licenseCodes.use", "compute.licenses.get", "compute.licenses.list", "compute.machineTypes.get", "compute.machineTypes.list", "compute.networks.get", "compute.networks.list", "compute.networks.use", "compute.networks.useExternalIp", "compute.nodeTemplates.list", "compute.projects.get", "compute.regionOperations.get", "compute.regions.get", "compute.regions.list", "compute.subnetworks.get", "compute.subnetworks.list", "compute.subnetworks.use", "compute.subnetworks.useExternalIp", "compute.zoneOperations.get", "compute.zones.get", "compute.zones.list", "iam.serviceAccounts.get", "iam.serviceAccounts.list", "resourcemanager.projects.get", "storage.buckets.create", "storage.buckets.delete", "storage.buckets.get", "storage.buckets.list", "storage.buckets.update", "storage.objects.create", "storage.objects.delete", "storage.objects.get", "storage.objects.list", "storage.objects.update"]
-  org_id           = var.organization_id
-  depends_on       = ["module.velo-project"]
+  role_id     = "velosMgmt"
+  title       = "Velostrata Manager"
+  description = "Velostrata Manager"
+  permissions = ["compute.addresses.create", "compute.addresses.createInternal", "compute.addresses.delete", "compute.addresses.deleteInternal", "compute.addresses.get", "compute.addresses.list", "compute.addresses.setLabels", "compute.addresses.use", "compute.addresses.useInternal", "compute.diskTypes.get", "compute.diskTypes.list", "compute.disks.create", "compute.disks.delete", "compute.disks.get", "compute.disks.list", "compute.disks.setLabels", "compute.disks.update", "compute.disks.use", "compute.disks.useReadOnly", "compute.images.get", "compute.images.list", "compute.images.useReadOnly", "compute.instances.attachDisk", "compute.instances.create", "compute.instances.delete", "compute.instances.detachDisk", "compute.instances.get", "compute.instances.getSerialPortOutput", "compute.instances.list", "compute.instances.reset", "compute.instances.setDiskAutoDelete", "compute.instances.setLabels", "compute.instances.setMachineType", "compute.instances.setMetadata", "compute.instances.setMinCpuPlatform", "compute.instances.setScheduling", "compute.instances.setServiceAccount", "compute.instances.setTags", "compute.instances.start", "compute.instances.startWithEncryptionKey", "compute.instances.stop", "compute.instances.update", "compute.instances.updateNetworkInterface", "compute.instances.use", "compute.licenseCodes.get", "compute.licenseCodes.list", "compute.licenseCodes.update", "compute.licenseCodes.use", "compute.licenses.get", "compute.licenses.list", "compute.machineTypes.get", "compute.machineTypes.list", "compute.networks.get", "compute.networks.list", "compute.networks.use", "compute.networks.useExternalIp", "compute.nodeTemplates.list", "compute.projects.get", "compute.regionOperations.get", "compute.regions.get", "compute.regions.list", "compute.subnetworks.get", "compute.subnetworks.list", "compute.subnetworks.use", "compute.subnetworks.useExternalIp", "compute.zoneOperations.get", "compute.zones.get", "compute.zones.list", "iam.serviceAccounts.get", "iam.serviceAccounts.list", "resourcemanager.projects.get", "storage.buckets.create", "storage.buckets.delete", "storage.buckets.get", "storage.buckets.list", "storage.buckets.update", "storage.objects.create", "storage.objects.delete", "storage.objects.get", "storage.objects.list", "storage.objects.update"]
+  org_id      = var.organization_id
+  depends_on  = ["module.velo-project"]
 }
 
 resource "google_project_iam_custom_role" "velos_gcp_ce_role" {
@@ -355,83 +343,41 @@ resource "google_service_account" "velos-cloud-extension" {
   Bind Roles to Service Accounts
  *****************************************/
 
-resource "google_project_iam_binding" "serviceAccountTokenCreator" {
-  project = var.velo_project_id
-  role    = "roles/iam.serviceAccountTokenCreator"
-    members = [
-        "serviceAccount:velos-manager@${var.velo_project_id}.iam.gserviceaccount.com"
-    ]
-  depends_on = ["google_service_account.velos-manager"]
-}
-
+#Not using organizations_iam module due to for_each unable to compute
 resource "google_organization_iam_binding" "serviceAccountUser" {
   org_id = var.organization_id
-  role    = "roles/iam.serviceAccountUser"
-    members = [
-        "serviceAccount:velos-manager@${var.velo_project_id}.iam.gserviceaccount.com"
-    ]
+  role   = "roles/iam.serviceAccountUser"
+  members = [
+    "serviceAccount:${google_service_account.velos-manager.email}"
+  ]
   depends_on = ["google_service_account.velos-manager"]
 }
 
-resource "google_project_iam_binding" "logWriter" {
+module "project-iam-bindings" {
+  source  = "terraform-google-modules/iam/google//modules/projects_iam"
+  version = "~> 4.0"
   project = var.velo_project_id
-  role    = "roles/logging.logWriter"
-    members = [
-        "serviceAccount:velos-manager@${var.velo_project_id}.iam.gserviceaccount.com"
+  mode    = "authoritative"
+  bindings = {
+    "roles/iam.serviceAccountTokenCreator" = [
+      "serviceAccount:${google_service_account.velos-manager.email}"
     ]
-  depends_on = ["google_service_account.velos-manager"]
-}
-
-resource "google_project_iam_binding" "metricWriter" {
-  project = var.velo_project_id
-  role    = "roles/monitoring.metricWriter"
-    members = [
-        "serviceAccount:velos-manager@${var.velo_project_id}.iam.gserviceaccount.com"
+    "roles/iam.serviceAccountUser" = [
+      "serviceAccount:${google_service_account.velos-manager.email}"
     ]
-  depends_on = ["google_service_account.velos-manager"]
-}
-
-resource "google_project_iam_binding" "monitoring" {
-  project = var.velo_project_id
-  role    = "roles/monitoring.viewer"
-    members = [
-        "serviceAccount:velos-manager@${var.velo_project_id}.iam.gserviceaccount.com"
+    "roles/logging.logWriter" = [
+      "serviceAccount:${google_service_account.velos-manager.email}",
+      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
     ]
-  depends_on = ["google_service_account.velos-manager"]
-}
-
-resource "google_project_iam_binding" "logWriter-ce" {
-  project = var.velo_project_id
-  role    = "roles/logging.logWriter"
-    members = [
-        "serviceAccount:velos-cloud-extension@${var.velo_project_id}.iam.gserviceaccount.com"
+    "roles/monitoring.metricWriter" = [
+      "serviceAccount:${google_service_account.velos-manager.email}",
+      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
     ]
-  depends_on = ["google_service_account.velos-cloud-extension"]
-}
-
-resource "google_project_iam_binding" "metricWriter-ce" {
-  project = var.velo_project_id
-  role    = "roles/monitoring.metricWriter"
-    members = [
-        "serviceAccount:velos-cloud-extension@${var.velo_project_id}.iam.gserviceaccount.com"
+    "roles/monitoring.viewer" = [
+      "serviceAccount:${google_service_account.velos-manager.email}"
     ]
-  depends_on = ["google_service_account.velos-cloud-extension"]
-}
-
-resource "google_organization_iam_binding" "velos_gcp_mgmt" {
-  org_id = var.organization_id
-  role    = "organizations/${var.organization_id}/roles/velosMgmt"
-    members = [
-        "serviceAccount:velos-manager@${var.velo_project_id}.iam.gserviceaccount.com"
+    "projects/${var.velo_project_id}/roles/velosCe" = [
+      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
     ]
-  depends_on = ["google_service_account.velos-cloud-extension"]
-}
-
-resource "google_project_iam_binding" "velos_gcp_ce" {
-  project = var.velo_project_id
-  role    = "projects/${var.velo_project_id}/roles/velosCe"
-    members = [
-        "serviceAccount:velos-cloud-extension@${var.velo_project_id}.iam.gserviceaccount.com"
-    ]
-  depends_on = ["google_service_account.velos-cloud-extension"]
+  }
 }
