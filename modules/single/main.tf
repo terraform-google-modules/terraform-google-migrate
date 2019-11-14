@@ -15,10 +15,38 @@
  */
 
 locals {
-  credentials_file_path = var.credentials_path
-  subnet_01             = "${var.network_name}-subnet-01"
-  subnet_02             = "${var.network_name}-subnet-02"
-  subnet_03             = "${var.network_name}-subnet-03"
+  subnet_01 = "${var.network_name}-subnet-01"
+  subnet_02 = "${var.network_name}-subnet-02"
+  subnet_03 = "${var.network_name}-subnet-03"
+  bindings = [
+    { role    = "roles/iam.serviceAccountTokenCreator"
+      members = ["serviceAccount:${google_service_account.velos-manager.email}"]
+    },
+    { role    = "roles/iam.serviceAccountUser"
+      members = ["serviceAccount:${google_service_account.velos-manager.email}"]
+    },
+    { role = "roles/logging.logWriter"
+      members = [
+        "serviceAccount:${google_service_account.velos-manager.email}",
+        "serviceAccount:${google_service_account.velos-cloud-extension.email}"
+      ]
+    },
+    { role = "roles/monitoring.metricWriter"
+      members = [
+        "serviceAccount:${google_service_account.velos-manager.email}",
+        "serviceAccount:${google_service_account.velos-cloud-extension.email}"
+      ]
+    },
+    { role    = "roles/monitoring.viewer"
+      members = ["serviceAccount:${google_service_account.velos-manager.email}"]
+    },
+    { role    = "projects/${var.project_id}/roles/velosMgmt"
+      members = ["serviceAccount:${google_service_account.velos-manager.email}"]
+    },
+    { role    = "projects/${var.project_id}/roles/velosCe"
+      members = ["serviceAccount:${google_service_account.velos-cloud-extension.email}"]
+    }
+  ]
 }
 
 ###############################################################################
@@ -259,34 +287,10 @@ resource "google_service_account" "velos-cloud-extension" {
 /******************************************
   Bind Roles to Service Accounts
  *****************************************/
-module "iam-bindings" {
-  source  = "terraform-google-modules/iam/google//modules/projects_iam"
-  version = "~> 4.0"
+#replaced IAM module due to for_each error.
+resource "google_project_iam_binding" "iam" {
+  count   = length(local.bindings)
   project = var.project_id
-  mode    = "authoritative"
-  bindings = {
-    "roles/iam.serviceAccountTokenCreator" = [
-      "serviceAccount:${google_service_account.velos-manager.email}"
-    ]
-    "roles/iam.serviceAccountUser" = [
-      "serviceAccount:${google_service_account.velos-manager.email}"
-    ]
-    "roles/logging.logWriter" = [
-      "serviceAccount:${google_service_account.velos-manager.email}",
-      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
-    ]
-    "roles/monitoring.metricWriter" = [
-      "serviceAccount:${google_service_account.velos-manager.email}",
-      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
-    ]
-    "roles/monitoring.viewer" = [
-      "serviceAccount:${google_service_account.velos-manager.email}"
-    ]
-    "projects/${var.project_id}/roles/velosMgmt" = [
-      "serviceAccount:${google_service_account.velos-manager.email}"
-    ]
-    "projects/${var.project_id}/roles/velosCe" = [
-      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
-    ]
-  }
+  role    = local.bindings[count.index].role
+  members = local.bindings[count.index].members
 }

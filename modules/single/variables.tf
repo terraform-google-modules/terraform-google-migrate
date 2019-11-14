@@ -21,12 +21,11 @@ variable "credentials_path" {
 
 variable "network_name" {
   description = "Name for the VPC network"
-  #default    = ""
+  default     = "velo-network"
 }
 
 variable "project_id" {
   description = "Project ID for GCP project"
-  #default    = ""
 }
 
 variable "subnet_01_ip" {

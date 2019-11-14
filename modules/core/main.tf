@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-locals {
-  credentials_file_path = var.credentials_path
+resource "random_string" "suffix" {
+  length  = 4
+  special = false
+  upper   = false
 }
 
 ###############################################################################
@@ -25,11 +27,10 @@ locals {
 module "project-factory" {
   source                  = "terraform-google-modules/project-factory/google"
   version                 = "~> 5.0"
-  random_project_id       = "false"
-  name                    = var.project_id
+  name                    = var.project_id == "" ? "velos-core-project-${random_string.suffix.result}" : var.project_id
   org_id                  = var.organization_id
   billing_account         = var.billing_account
-  credentials_path        = local.credentials_file_path
+  credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   folder_id               = var.folder_id
   #bucket_location         = "europe-west1"
