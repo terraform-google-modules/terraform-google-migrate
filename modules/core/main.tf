@@ -27,7 +27,7 @@ resource "random_string" "suffix" {
 module "project-factory" {
   source                  = "terraform-google-modules/project-factory/google"
   version                 = "~> 5.0"
-  name                    = var.project_id == "" ? "velos-core-project-${random_string.suffix.result}" : var.project_id
+  name                    = var.project_name == "" ? "velos-core-project-${random_string.suffix.result}" : var.project_name
   org_id                  = var.organization_id
   billing_account         = var.billing_account
   credentials_path        = var.credentials_path
@@ -35,7 +35,7 @@ module "project-factory" {
   folder_id               = var.folder_id
   #bucket_location         = "europe-west1"
   #bucket_name             = "terraform-state"
-  #bucket_project          = var.project_id
+  #bucket_project          = var.project_name
   #auto_create_network     = "false"
   activate_apis = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }

@@ -32,8 +32,8 @@ variable "default_service_account" {
   default     = "depriviledge"
 }
 
-variable "project_id" {
-  description = "Project ID for GCP project"
+variable "project_name" {
+  description = "Project Name for GCP project"
   default     = ""
 }
 

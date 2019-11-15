@@ -29,36 +29,52 @@ variable "credentials_path" {
 
 variable "default_service_account" {
   description = "Project default service account setting: can be one of `delete`, `depriviledge`, or `keep`."
+  default     = "depriviledge"
 }
 
-variable "velo_project_id" {
-  description = "Velostrata GCP Project ID"
-  #default    = ""
+variable "velo_project_name" {
+  description = "Velostrata GCP Project Name"
+  default     = ""
 }
 
-variable "prod_project_id" {
-  description = "Production GCP Project ID"
-  #default    = ""
+variable "prod_project_name" {
+  description = "Production GCP Project Name"
+  default     = ""
 }
 
-variable "stage_project_id" {
-  description = "Staging GCP Project ID"
-  #default    = ""
+variable "stage_project_name" {
+  description = "Staging GCP Project Name"
+  default     = ""
 }
 
-variable "test_project_id" {
-  description = "Test GCP Project ID"
-  #default    = ""
+variable "test_project_name" {
+  description = "Test GCP Project Name"
+  default     = ""
+}
+
+variable "velo_folder_id" {
+  description = "Velostrata Folder ID"
+}
+
+variable "prod_folder_id" {
+  description = "Production Folder ID"
+}
+
+variable "stg_folder_id" {
+  description = "Staging Folder ID"
+}
+
+variable "test_folder_id" {
+  description = "Test Folder ID"
 }
 
 variable "network_name" {
   description = "Name for Shared VPC network"
-  #default    = ""
+  default     = "velo-network"
 }
 
 variable "vpc_project_id" {
-  description = "Name for Shared VPC hosting GCP project"
-  #default    = ""
+  description = "Project ID for Shared VPC hosting GCP project"
 }
 
 variable "subnet_01_ip" {
@@ -109,10 +125,4 @@ variable "subnet_03_region" {
 variable "local_subnet_01_ip" {
   description = "IP range of the on-prem network"
   #default    = ""
-}
-
-variable "folder_id" {
-  description = "The ID of a folder to host this project"
-  type        = string
-  default     = ""
 }

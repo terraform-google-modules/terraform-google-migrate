@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-locals {
-  credentials_file_path = var.credentials_path
+resource "random_string" "suffix" {
+  length  = 4
+  special = false
+  upper   = false
 }
 
 ###############################################################################
@@ -26,6 +28,32 @@ locals {
   subnet_01 = "${var.network_name}-subnet-01"
   subnet_02 = "${var.network_name}-subnet-02"
   subnet_03 = "${var.network_name}-subnet-03"
+  bindings = [
+    { role    = "roles/iam.serviceAccountTokenCreator"
+      members = ["serviceAccount:${google_service_account.velos-manager.email}"]
+    },
+    { role    = "roles/iam.serviceAccountUser"
+      members = ["serviceAccount:${google_service_account.velos-manager.email}"]
+    },
+    { role = "roles/logging.logWriter"
+      members = [
+        "serviceAccount:${google_service_account.velos-manager.email}",
+        "serviceAccount:${google_service_account.velos-cloud-extension.email}"
+      ]
+    },
+    { role = "roles/monitoring.metricWriter"
+      members = [
+        "serviceAccount:${google_service_account.velos-manager.email}",
+        "serviceAccount:${google_service_account.velos-cloud-extension.email}"
+      ]
+    },
+    { role    = "roles/monitoring.viewer"
+      members = ["serviceAccount:${google_service_account.velos-manager.email}"]
+    },
+    { role    = "projects/${module.velo-project.project_id}/roles/velosCe"
+      members = ["serviceAccount:${google_service_account.velos-cloud-extension.email}"]
+    }
+  ]
 }
 
 /******************************************
@@ -39,7 +67,7 @@ module "vpc" {
   project_id   = var.vpc_project_id
   network_name = var.network_name
 
-  delete_default_internet_gateway_routes = "true"
+  delete_default_internet_gateway_routes = "false"
   shared_vpc_host                        = "true"
 
   subnets = [
@@ -86,6 +114,25 @@ module "vpc" {
       },
     ]
   }
+}
+
+module "net-shared-vpc-access" {
+  source              = "terraform-google-modules/network/google//modules/fabric-net-svpc-access"
+  host_project_id     = var.vpc_project_id
+  service_project_num = 3
+  service_project_ids = [module.velo-project.project_id, module.prod-project.project_id, module.stage-project.project_id, module.test-project.project_id]
+  host_subnets        = module.vpc.subnets_names
+  host_subnet_regions = [var.subnet_01_region, var.subnet_02_region, var.subnet_03_region]
+  host_subnet_users = {
+    "${local.subnet_01}" = "serviceAccount:${module.velo-project.service_account_email},serviceAccount:${module.prod-project.service_account_email},serviceAccount:${module.stage-project.service_account_email},serviceAccount:${module.test-project.service_account_email}"
+    "${local.subnet_02}" = "serviceAccount:${module.velo-project.service_account_email},serviceAccount:${module.prod-project.service_account_email},serviceAccount:${module.stage-project.service_account_email},serviceAccount:${module.test-project.service_account_email}"
+    "${local.subnet_03}" = "serviceAccount:${module.velo-project.service_account_email},serviceAccount:${module.prod-project.service_account_email},serviceAccount:${module.stage-project.service_account_email},serviceAccount:${module.test-project.service_account_email}"
+  }
+  host_service_agent_role = true
+  host_service_agent_users = [
+    "serviceAccount:${google_service_account.velos-manager.email}",
+    "serviceAccount:${google_service_account.velos-cloud-extension.email}",
+  ]
 }
 
 /******************************************
@@ -222,77 +269,49 @@ resource "google_compute_firewall" "velos-workload" {
 module "velo-project" {
   source                  = "terraform-google-modules/project-factory/google"
   version                 = "~> 5.0"
-  random_project_id       = "false"
-  name                    = var.velo_project_id
+  name                    = var.velo_project_name == "" ? "velos-project-${random_string.suffix.result}" : var.velo_project_name
   org_id                  = var.organization_id
-  folder_id               = var.folder_id
+  folder_id               = var.velo_folder_id
   billing_account         = var.billing_account
-  credentials_path        = local.credentials_file_path
+  credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
-  shared_vpc              = var.vpc_project_id
-  shared_vpc_subnets = [
-    "projects/${var.vpc_project_id}/regions/${var.subnet_01_region}/subnetworks/${local.subnet_01}",
-    "projects/${var.vpc_project_id}/regions/${var.subnet_02_region}/subnetworks/${local.subnet_02}",
-    "projects/${var.vpc_project_id}/regions/${var.subnet_03_region}/subnetworks/${local.subnet_03}",
-  ]
 }
 
 module "prod-project" {
   source                  = "terraform-google-modules/project-factory/google"
   version                 = "~> 5.0"
-  random_project_id       = "false"
-  name                    = var.prod_project_id
+  name                    = var.prod_project_name == "" ? "prod-project-${random_string.suffix.result}" : var.prod_project_name
   org_id                  = var.organization_id
-  folder_id               = var.folder_id
+  folder_id               = var.prod_folder_id
   billing_account         = var.billing_account
-  credentials_path        = local.credentials_file_path
+  credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
-  shared_vpc              = var.vpc_project_id
-  shared_vpc_subnets = [
-    "projects/${var.vpc_project_id}/regions/${var.subnet_01_region}/subnetworks/${local.subnet_01}",
-    "projects/${var.vpc_project_id}/regions/${var.subnet_02_region}/subnetworks/${local.subnet_02}",
-    "projects/${var.vpc_project_id}/regions/${var.subnet_03_region}/subnetworks/${local.subnet_03}",
-  ]
 }
 
 module "stage-project" {
   source                  = "terraform-google-modules/project-factory/google"
   version                 = "~> 5.0"
-  random_project_id       = "false"
-  name                    = var.stage_project_id
+  name                    = var.stage_project_name == "" ? "stage-project-${random_string.suffix.result}" : var.stage_project_name
   org_id                  = var.organization_id
-  folder_id               = var.folder_id
+  folder_id               = var.stg_folder_id
   billing_account         = var.billing_account
-  credentials_path        = local.credentials_file_path
+  credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
-  shared_vpc              = var.vpc_project_id
-  shared_vpc_subnets = [
-    "projects/${var.vpc_project_id}/regions/${var.subnet_01_region}/subnetworks/${local.subnet_01}",
-    "projects/${var.vpc_project_id}/regions/${var.subnet_02_region}/subnetworks/${local.subnet_02}",
-    "projects/${var.vpc_project_id}/regions/${var.subnet_03_region}/subnetworks/${local.subnet_03}",
-  ]
 }
 
 module "test-project" {
   source                  = "terraform-google-modules/project-factory/google"
   version                 = "~> 5.0"
-  random_project_id       = "false"
-  name                    = var.test_project_id
+  name                    = var.test_project_name == "" ? "test-project-${random_string.suffix.result}" : var.test_project_name
   org_id                  = var.organization_id
-  folder_id               = var.folder_id
+  folder_id               = var.test_folder_id
   billing_account         = var.billing_account
-  credentials_path        = local.credentials_file_path
+  credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
-  shared_vpc              = var.vpc_project_id
-  shared_vpc_subnets = [
-    "projects/${var.vpc_project_id}/regions/${var.subnet_01_region}/subnetworks/${local.subnet_01}",
-    "projects/${var.vpc_project_id}/regions/${var.subnet_02_region}/subnetworks/${local.subnet_02}",
-    "projects/${var.vpc_project_id}/regions/${var.subnet_03_region}/subnetworks/${local.subnet_03}",
-  ]
 }
 
 ###############################################################################
@@ -317,7 +336,7 @@ resource "google_project_iam_custom_role" "velos_gcp_ce_role" {
   title       = "Velostrata Storage Access"
   description = "Velostrata Storage Access"
   permissions = ["storage.objects.create", "storage.objects.delete", "storage.objects.get", "storage.objects.list", "storage.objects.update"]
-  project     = var.velo_project_id
+  project     = module.velo-project.project_id
   depends_on  = ["module.velo-project"]
 }
 
@@ -328,14 +347,14 @@ resource "google_project_iam_custom_role" "velos_gcp_ce_role" {
 resource "google_service_account" "velos-manager" {
   account_id   = "velos-manager"
   display_name = "velos-manager"
-  project      = var.velo_project_id
+  project      = module.velo-project.project_id
   depends_on   = ["google_organization_iam_custom_role.velos_gcp_mgmt_role", "google_project_iam_custom_role.velos_gcp_ce_role"]
 }
 
 resource "google_service_account" "velos-cloud-extension" {
   account_id   = "velos-cloud-extension"
   display_name = "velos-cloud-extension"
-  project      = var.velo_project_id
+  project      = module.velo-project.project_id
   depends_on   = ["google_organization_iam_custom_role.velos_gcp_mgmt_role", "google_project_iam_custom_role.velos_gcp_ce_role"]
 }
 
@@ -352,32 +371,17 @@ resource "google_organization_iam_binding" "serviceAccountUser" {
   ]
   depends_on = ["google_service_account.velos-manager"]
 }
+#replaced IAM module due to for_each error.
+resource "google_project_iam_binding" "iam" {
+  count   = length(local.bindings)
+  project = module.velo-project.project_id
+  role    = local.bindings[count.index].role
+  members = local.bindings[count.index].members
+}
 
-module "project-iam-bindings" {
-  source  = "terraform-google-modules/iam/google//modules/projects_iam"
-  version = "~> 4.0"
-  project = var.velo_project_id
-  mode    = "authoritative"
-  bindings = {
-    "roles/iam.serviceAccountTokenCreator" = [
-      "serviceAccount:${google_service_account.velos-manager.email}"
-    ]
-    "roles/iam.serviceAccountUser" = [
-      "serviceAccount:${google_service_account.velos-manager.email}"
-    ]
-    "roles/logging.logWriter" = [
-      "serviceAccount:${google_service_account.velos-manager.email}",
-      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
-    ]
-    "roles/monitoring.metricWriter" = [
-      "serviceAccount:${google_service_account.velos-manager.email}",
-      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
-    ]
-    "roles/monitoring.viewer" = [
-      "serviceAccount:${google_service_account.velos-manager.email}"
-    ]
-    "projects/${var.velo_project_id}/roles/velosCe" = [
-      "serviceAccount:${google_service_account.velos-cloud-extension.email}"
-    ]
-  }
+#for deploying velostrata from marketplace velo-proj Google APIs service account needs compute.networkUser on host
+resource "google_project_iam_binding" "vpc-velo-proj-cloud-services-svc" {
+  project = var.vpc_project_id
+  role    = "roles/compute.networkUser"
+  members = ["serviceAccount:${module.velo-project.project_number}@cloudservices.gserviceaccount.com"]
 }

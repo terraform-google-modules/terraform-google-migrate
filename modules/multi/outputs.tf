@@ -125,3 +125,37 @@ output "routes" {
 }
 
 */
+output "velos_project_id" {
+  value       = module.velo-project.project_id
+  description = "The ID of the velo project"
+}
+
+output "prod_project_id" {
+  value       = module.prod-project.project_id
+  description = "The ID of the prod project"
+}
+
+output "stage_project_id" {
+  value       = module.stage-project.project_id
+  description = "The ID of the stage project"
+}
+
+output "test_project_id" {
+  value       = module.test-project.project_id
+  description = "The ID of the test project"
+}
+
+output "network_name" {
+  value       = module.vpc.network_name
+  description = "The name of the VPC being created"
+}
+
+output "velos_migration_manager_svc" {
+  value       = google_service_account.velos-manager.email
+  description = "Service account for Manager Service"
+}
+output "velos_compute_engine_cloud_extension_svc" {
+  value       = google_service_account.velos-cloud-extension.email
+  description = "Service account for Compute Engine Cloud Extension"
+}
+
