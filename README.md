@@ -29,7 +29,7 @@ Before proceeding with migration, you should already know:
 
 1.  How many approximately VMs will be migrated
 2.  What is migration target VMs source - Azure, AWS or on-prem
-3.  How many GCP projects you will need for migrated VMs 
+3.  How many GCP projects you will need for migrated VMs
 4.  Do you have/plan on-prem or other cloud connection to GCP via [VPN](https://cloud.google.com/vpn/docs/concepts/overview) / [Interconnect](https://cloud.google.com/hybrid-connectivity/)
 5.  Is there any network load balancing involved
 6.  How much storage will be needed in GCP
@@ -79,7 +79,7 @@ Finally [deploying](https://cloud.google.com/migrate/compute-engine/docs/4.5/how
 ### Tools
 
 **Install Cloud SDK** \
-The Google Cloud SDK is used to interact with your GCP resources. [Installation instructions](https://cloud.google.com/sdk/downloads) for 
+The Google Cloud SDK is used to interact with your GCP resources. [Installation instructions](https://cloud.google.com/sdk/downloads) for
 
 multiple platforms are available online.
 
@@ -87,7 +87,7 @@ multiple platforms are available online.
 Terraform is used to automate the manipulation of cloud infrastructure. Its [installation instructions](https://www.terraform.io/intro/getting-started/install.html) are also available online.
 
 **Authenticate gcloud** \
-Prior to running this, ensure you have authenticated your gcloud client by running the following command: 
+Prior to running this, ensure you have authenticated your gcloud client by running the following command:
 
 
 

@@ -2,7 +2,7 @@
 ._*
 
 # OSX trash
-.DS_Store
+**/.DS_Store
 
 # Python
 *.pyc
@@ -27,7 +27,7 @@ Session.vim
 # .tfstate files
 *.tfstate
 *.tfstate.*
-*.out
+**/*.out
 
 # Crash log files
 crash.log
