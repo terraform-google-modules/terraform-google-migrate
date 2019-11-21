@@ -50,7 +50,7 @@ locals {
     { role    = "roles/monitoring.viewer"
       members = ["serviceAccount:${google_service_account.velos-manager.email}"]
     },
-    { role    = "projects/${module.velo-project.project_id}/roles/velosCe"
+    { role    = "projects/${module.velo-project.project_id}/roles/cloudmigration.storageaccess"
       members = ["serviceAccount:${google_service_account.velos-cloud-extension.email}"]
     }
   ]
@@ -319,28 +319,6 @@ module "test-project" {
 ###############################################################################
 
 /******************************************
-  Custom Roles
- *****************************************/
-
-resource "google_organization_iam_custom_role" "velos_gcp_mgmt_role" {
-  role_id     = "velosMgmt"
-  title       = "Velostrata Manager"
-  description = "Velostrata Manager"
-  permissions = ["compute.addresses.create", "compute.addresses.createInternal", "compute.addresses.delete", "compute.addresses.deleteInternal", "compute.addresses.get", "compute.addresses.list", "compute.addresses.setLabels", "compute.addresses.use", "compute.addresses.useInternal", "compute.diskTypes.get", "compute.diskTypes.list", "compute.disks.create", "compute.disks.delete", "compute.disks.get", "compute.disks.list", "compute.disks.setLabels", "compute.disks.update", "compute.disks.use", "compute.disks.useReadOnly", "compute.images.get", "compute.images.list", "compute.images.useReadOnly", "compute.instances.attachDisk", "compute.instances.create", "compute.instances.delete", "compute.instances.detachDisk", "compute.instances.get", "compute.instances.getSerialPortOutput", "compute.instances.list", "compute.instances.reset", "compute.instances.setDiskAutoDelete", "compute.instances.setLabels", "compute.instances.setMachineType", "compute.instances.setMetadata", "compute.instances.setMinCpuPlatform", "compute.instances.setScheduling", "compute.instances.setServiceAccount", "compute.instances.setTags", "compute.instances.start", "compute.instances.startWithEncryptionKey", "compute.instances.stop", "compute.instances.update", "compute.instances.updateNetworkInterface", "compute.instances.use", "compute.licenseCodes.get", "compute.licenseCodes.list", "compute.licenseCodes.update", "compute.licenseCodes.use", "compute.licenses.get", "compute.licenses.list", "compute.machineTypes.get", "compute.machineTypes.list", "compute.networks.get", "compute.networks.list", "compute.networks.use", "compute.networks.useExternalIp", "compute.nodeTemplates.list", "compute.projects.get", "compute.regionOperations.get", "compute.regions.get", "compute.regions.list", "compute.subnetworks.get", "compute.subnetworks.list", "compute.subnetworks.use", "compute.subnetworks.useExternalIp", "compute.zoneOperations.get", "compute.zones.get", "compute.zones.list", "iam.serviceAccounts.get", "iam.serviceAccounts.list", "resourcemanager.projects.get", "storage.buckets.create", "storage.buckets.delete", "storage.buckets.get", "storage.buckets.list", "storage.buckets.update", "storage.objects.create", "storage.objects.delete", "storage.objects.get", "storage.objects.list", "storage.objects.update"]
-  org_id      = var.organization_id
-  depends_on  = ["module.velo-project"]
-}
-
-resource "google_project_iam_custom_role" "velos_gcp_ce_role" {
-  role_id     = "velosCe"
-  title       = "Velostrata Storage Access"
-  description = "Velostrata Storage Access"
-  permissions = ["storage.objects.create", "storage.objects.delete", "storage.objects.get", "storage.objects.list", "storage.objects.update"]
-  project     = module.velo-project.project_id
-  depends_on  = ["module.velo-project"]
-}
-
-/******************************************
  Service Accounts
  *****************************************/
 
@@ -348,14 +326,12 @@ resource "google_service_account" "velos-manager" {
   account_id   = "velos-manager"
   display_name = "velos-manager"
   project      = module.velo-project.project_id
-  depends_on   = ["google_organization_iam_custom_role.velos_gcp_mgmt_role", "google_project_iam_custom_role.velos_gcp_ce_role"]
 }
 
 resource "google_service_account" "velos-cloud-extension" {
   account_id   = "velos-cloud-extension"
   display_name = "velos-cloud-extension"
   project      = module.velo-project.project_id
-  depends_on   = ["google_organization_iam_custom_role.velos_gcp_mgmt_role", "google_project_iam_custom_role.velos_gcp_ce_role"]
 }
 
 /******************************************
@@ -371,6 +347,16 @@ resource "google_organization_iam_binding" "serviceAccountUser" {
   ]
   depends_on = ["google_service_account.velos-manager"]
 }
+
+resource "google_organization_iam_binding" "velos_gcp_mgmt" {
+  org_id = var.organization_id
+  role    = "organizations/${var.organization_id}/roles/cloudmigration.inframanager"
+    members = [
+      "serviceAccount:${google_service_account.velos-manager.email}"
+    ]
+  depends_on = ["google_service_account.velos-cloud-extension"]
+}
+
 #replaced IAM module due to for_each error.
 resource "google_project_iam_binding" "iam" {
   count   = length(local.bindings)
