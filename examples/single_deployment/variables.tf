@@ -78,3 +78,11 @@ variable "subnet_03_region" {
 variable "local_subnet_01_ip" {
   description = "IP range of the on-prem network"
 }
+
+variable "router_region" {
+  description = "The region in which you want to create the router"
+}
+
+variable "vpn_region" {
+  description = "The region in which you want to create the VPN gateway"
+}

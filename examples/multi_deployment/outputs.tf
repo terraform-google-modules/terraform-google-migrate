@@ -50,11 +50,21 @@ output "velos_network_name" {
 }
 
 output "velos_migration_manager_svc" {
-  description = "Name of the VPC created"
+  description = "Velostrata migration service account"
   value       = module.velos-multi-project.velos_migration_manager_svc
 }
 
 output "velos_compute_engine_cloud_extension_svc" {
-  description = "Name of the VPC created"
+  description = "Velostrata cloud extension service account"
   value       = module.velos-multi-project.velos_compute_engine_cloud_extension_svc
+}
+
+output "vpc_tunnel_name" {
+  description = "The VPN tunnel name is"
+  value       = module.velos-vpn.vpn_tunnels_names-dynamic
+}
+
+output "gateway_ip" {
+  description = "The VPN Gateway Public IP"
+  value       = module.velos-vpn.gateway_ip
 }

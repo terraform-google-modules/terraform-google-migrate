@@ -40,10 +40,10 @@ locals {
     { role    = "roles/monitoring.viewer"
       members = ["serviceAccount:${google_service_account.velos-manager.email}"]
     },
-    { role    = "projects/${var.project_id}/roles/cloudmigration.inframanager"
+    { role    = "roles/cloudmigration.inframanager"
       members = ["serviceAccount:${google_service_account.velos-manager.email}"]
     },
-    { role    = "projects/${var.project_id}/roles/cloudmigration.storageaccess"
+    { role    = "roles/cloudmigration.storageaccess"
       members = ["serviceAccount:${google_service_account.velos-cloud-extension.email}"]
     }
   ]

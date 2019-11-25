@@ -69,3 +69,13 @@ module "velos-multi-project" {
   local_subnet_01_ip  = var.local_subnet_01_ip
 
 }
+/*****************************************
+  VPN
+ *****************************************/
+module "velos-vpn" {
+  source        = "../../modules/networking/vpn"
+  project_id    = module.core-project.project_id
+  network       = module.velos-multi-project.network_name
+  router_region = var.router_region
+  vpn_region    = var.vpn_region
+}

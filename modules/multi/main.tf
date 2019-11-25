@@ -50,7 +50,7 @@ locals {
     { role    = "roles/monitoring.viewer"
       members = ["serviceAccount:${google_service_account.velos-manager.email}"]
     },
-    { role    = "projects/${module.velo-project.project_id}/roles/cloudmigration.storageaccess"
+    { role    = "roles/cloudmigration.storageaccess"
       members = ["serviceAccount:${google_service_account.velos-cloud-extension.email}"]
     }
   ]
@@ -350,10 +350,10 @@ resource "google_organization_iam_binding" "serviceAccountUser" {
 
 resource "google_organization_iam_binding" "velos_gcp_mgmt" {
   org_id = var.organization_id
-  role    = "organizations/${var.organization_id}/roles/cloudmigration.inframanager"
-    members = [
-      "serviceAccount:${google_service_account.velos-manager.email}"
-    ]
+  role   = "roles/cloudmigration.inframanager"
+  members = [
+    "serviceAccount:${google_service_account.velos-manager.email}"
+  ]
   depends_on = ["google_service_account.velos-cloud-extension"]
 }
 
