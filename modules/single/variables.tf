@@ -24,8 +24,28 @@ variable "network_name" {
   default     = "velo-network"
 }
 
-variable "project_id" {
-  description = "Project ID for GCP project"
+variable "organization_id" {
+  description = "The organization id for the associated services"
+}
+
+variable "billing_account" {
+  description = "The ID of the billing account to associate this project with"
+}
+
+variable "default_service_account" {
+  description = "Project default service account setting: can be one of `delete`, `depriviledge`, or `keep`."
+  default     = "depriviledge"
+}
+
+variable "project_name" {
+  description = "Project Name for GCP project"
+  default     = ""
+}
+
+variable "folder_id" {
+  description = "The ID of a folder to host this project"
+  type        = string
+  default     = ""
 }
 
 variable "subnet_01_ip" {
@@ -40,21 +60,6 @@ variable "subnet_02_ip" {
 
 variable "subnet_03_ip" {
   description = "IP range for the subnet"
-  #default    = ""
-}
-
-variable "secondary_s01_range" {
-  description = "Secondary IP range for the subnet"
-  #default    = ""
-}
-
-variable "secondary_s02_range" {
-  description = "Secondary IP range for the subnet"
-  #default    = ""
-}
-
-variable "secondary_s03_range" {
-  description = "Secondary IP range for the subnet"
   #default    = ""
 }
 

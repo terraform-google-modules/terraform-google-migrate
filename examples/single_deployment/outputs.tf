@@ -20,8 +20,8 @@ output "folders" {
 }
 
 output "core_project_id" {
-  description = "Project id of the core project"
-  value       = module.core-project.project_id
+  description = "Project id of the velos project"
+  value       = module.velos-single-project.project_id
 }
 
 output "velos_network_name" {

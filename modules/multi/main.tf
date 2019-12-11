@@ -92,28 +92,6 @@ module "vpc" {
     },
   ]
 
-  secondary_ranges = {
-    "${local.subnet_01}" = [
-      {
-        range_name    = "${local.subnet_01}-01"
-        ip_cidr_range = var.secondary_s01_range
-      },
-    ]
-
-    "${local.subnet_02}" = [
-      {
-        range_name    = "${local.subnet_02}-01"
-        ip_cidr_range = var.secondary_s02_range
-      },
-    ]
-
-    "${local.subnet_03}" = [
-      {
-        range_name    = "${local.subnet_03}-01"
-        ip_cidr_range = var.secondary_s03_range
-      },
-    ]
-  }
 }
 
 module "net-shared-vpc-access" {
@@ -146,7 +124,7 @@ resource "google_compute_firewall" "velos-backend-control" {
   project       = var.vpc_project_id
   source_ranges = [var.local_subnet_01_ip]
   target_tags   = ["fw-velosmanager"]
-  depends_on    = ["module.vpc"]
+  depends_on    = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -161,7 +139,7 @@ resource "google_compute_firewall" "velos-ce-backend" {
   project       = var.vpc_project_id
   source_ranges = [var.local_subnet_01_ip]
   target_tags   = ["fw-velostrata"]
-  depends_on    = ["module.vpc"]
+  depends_on    = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -176,7 +154,7 @@ resource "google_compute_firewall" "velos-ce-control" {
   project     = var.vpc_project_id
   source_tags = ["fw-velosmanager"]
   target_tags = ["fw-velostrata"]
-  depends_on  = ["module.vpc"]
+  depends_on  = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -191,7 +169,7 @@ resource "google_compute_firewall" "velos-ce-cross" {
   project     = var.vpc_project_id
   source_tags = ["fw-velostrata"]
   target_tags = ["fw-velostrata"]
-  depends_on  = ["module.vpc"]
+  depends_on  = [module.vpc]
 
   allow {
     protocol = "all"
@@ -205,7 +183,7 @@ resource "google_compute_firewall" "velos-console-probe" {
   project     = var.vpc_project_id
   source_tags = ["fw-velosmanager"]
   target_tags = ["fw-workload"]
-  depends_on  = ["module.vpc"]
+  depends_on  = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -220,7 +198,7 @@ resource "google_compute_firewall" "velos-vcplugin" {
   project       = var.vpc_project_id
   source_ranges = [var.local_subnet_01_ip]
   target_tags   = ["fw-velosmanager"]
-  depends_on    = ["module.vpc"]
+  depends_on    = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -235,7 +213,7 @@ resource "google_compute_firewall" "velos-webui" {
   project       = var.vpc_project_id
   source_ranges = [var.local_subnet_01_ip, "10.10.20.0/24"]
   target_tags   = ["fw-velosmanager"]
-  depends_on    = ["module.vpc"]
+  depends_on    = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -250,7 +228,7 @@ resource "google_compute_firewall" "velos-workload" {
   project       = var.vpc_project_id
   source_ranges = [var.local_subnet_01_ip, "10.10.20.0/24"]
   target_tags   = ["fw-velosmanager"]
-  depends_on    = ["module.vpc"]
+  depends_on    = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -345,7 +323,7 @@ resource "google_organization_iam_binding" "serviceAccountUser" {
   members = [
     "serviceAccount:${google_service_account.velos-manager.email}"
   ]
-  depends_on = ["google_service_account.velos-manager"]
+  depends_on = [google_service_account.velos-manager]
 }
 
 resource "google_organization_iam_binding" "velos_gcp_mgmt" {
@@ -354,7 +332,7 @@ resource "google_organization_iam_binding" "velos_gcp_mgmt" {
   members = [
     "serviceAccount:${google_service_account.velos-manager.email}"
   ]
-  depends_on = ["google_service_account.velos-cloud-extension"]
+  depends_on = [google_service_account.velos-cloud-extension]
 }
 
 #replaced IAM module due to for_each error.

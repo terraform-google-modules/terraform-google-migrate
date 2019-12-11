@@ -48,7 +48,31 @@ locals {
     }
   ]
 }
+resource "random_string" "suffix" {
+  length  = 4
+  special = false
+  upper   = false
+}
 
+###############################################################################
+#                          Project
+###############################################################################
+
+module "velos-project" {
+  source                  = "terraform-google-modules/project-factory/google"
+  version                 = "~> 5.0"
+  name                    = var.project_name == "" ? "velos-core-project-${random_string.suffix.result}" : var.project_name
+  org_id                  = var.organization_id
+  billing_account         = var.billing_account
+  credentials_path        = var.credentials_path
+  default_service_account = var.default_service_account
+  folder_id               = var.folder_id
+  #bucket_location         = "europe-west1"
+  #bucket_name             = "terraform-state"
+  #bucket_project          = var.project_name
+  #auto_create_network     = "false"
+  activate_apis = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
+}
 ###############################################################################
 #                          Networking (VPCs, Firewalls)
 ###############################################################################
@@ -61,7 +85,7 @@ module "vpc" {
   source  = "terraform-google-modules/network/google"
   version = "~> 1.4.3"
 
-  project_id   = var.project_id
+  project_id   = module.velos-project.project_id
   network_name = var.network_name
 
   delete_default_internet_gateway_routes = "true"
@@ -89,28 +113,6 @@ module "vpc" {
     },
   ]
 
-  secondary_ranges = {
-    "${local.subnet_01}" = [
-      {
-        range_name    = "${local.subnet_01}-01"
-        ip_cidr_range = var.secondary_s01_range
-      },
-    ]
-
-    "${local.subnet_02}" = [
-      {
-        range_name    = "${local.subnet_02}-01"
-        ip_cidr_range = var.secondary_s02_range
-      },
-    ]
-
-    "${local.subnet_03}" = [
-      {
-        range_name    = "${local.subnet_03}-01"
-        ip_cidr_range = var.secondary_s03_range
-      },
-    ]
-  }
 }
 
 /******************************************
@@ -121,10 +123,10 @@ resource "google_compute_firewall" "velos-backend-control" {
   name          = "velos-backend-control"
   description   = "Control plane between Velostrata Backend and Velostrata Manager"
   network       = var.network_name
-  project       = var.project_id
+  project       = module.velos-project.project_id
   source_ranges = [var.local_subnet_01_ip]
   target_tags   = ["fw-velosmanager"]
-  depends_on    = ["module.vpc"]
+  depends_on    = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -136,10 +138,10 @@ resource "google_compute_firewall" "velos-ce-backend" {
   name          = "velos-ce-backend"
   description   = "Encrypted migration data sent from Velostrata Backend to Cloud Extensions"
   network       = var.network_name
-  project       = var.project_id
+  project       = module.velos-project.project_id
   source_ranges = [var.local_subnet_01_ip]
   target_tags   = ["fw-velostrata"]
-  depends_on    = ["module.vpc"]
+  depends_on    = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -151,10 +153,10 @@ resource "google_compute_firewall" "velos-ce-control" {
   name        = "velos-ce-control"
   description = "Control plane between Cloud Extensions and Velostrata Manager"
   network     = var.network_name
-  project     = var.project_id
+  project     = module.velos-project.project_id
   source_tags = ["fw-velosmanager"]
   target_tags = ["fw-velostrata"]
-  depends_on  = ["module.vpc"]
+  depends_on  = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -166,10 +168,10 @@ resource "google_compute_firewall" "velos-ce-cross" {
   name        = "velos-ce-cross"
   description = "Synchronization between Cloud Extension nodes"
   network     = var.network_name
-  project     = var.project_id
+  project     = module.velos-project.project_id
   source_tags = ["fw-velostrata"]
   target_tags = ["fw-velostrata"]
-  depends_on  = ["module.vpc"]
+  depends_on  = [module.vpc]
 
   allow {
     protocol = "all"
@@ -180,10 +182,10 @@ resource "google_compute_firewall" "velos-console-probe" {
   name        = "velos-console-probe"
   description = "Allows the Velostrata Manager to check if the SSH or RDP console on the migrated VM is available"
   network     = var.network_name
-  project     = var.project_id
+  project     = module.velos-project.project_id
   source_tags = ["fw-velosmanager"]
   target_tags = ["fw-workload"]
-  depends_on  = ["module.vpc"]
+  depends_on  = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -195,10 +197,10 @@ resource "google_compute_firewall" "velos-vcplugin" {
   name          = "velos-vcplugin"
   description   = "Control plane between vCenter plugin and Velostrata Manager"
   network       = var.network_name
-  project       = var.project_id
+  project       = module.velos-project.project_id
   source_ranges = [var.local_subnet_01_ip]
   target_tags   = ["fw-velosmanager"]
-  depends_on    = ["module.vpc"]
+  depends_on    = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -210,10 +212,10 @@ resource "google_compute_firewall" "velos-webui" {
   name          = "velos-webui"
   description   = "HTTPS access to Velostrata Manager for web UI"
   network       = var.network_name
-  project       = var.project_id
+  project       = module.velos-project.project_id
   source_ranges = [var.local_subnet_01_ip, "10.10.20.0/24"]
   target_tags   = ["fw-velosmanager"]
-  depends_on    = ["module.vpc"]
+  depends_on    = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -225,10 +227,10 @@ resource "google_compute_firewall" "velos-workload" {
   name          = "velos-workload"
   description   = "iSCSI for data migration and syslog"
   network       = var.network_name
-  project       = var.project_id
+  project       = module.velos-project.project_id
   source_ranges = [var.local_subnet_01_ip, "10.10.20.0/24"]
   target_tags   = ["fw-velosmanager"]
-  depends_on    = ["module.vpc"]
+  depends_on    = [module.vpc]
 
   allow {
     protocol = "tcp"
@@ -251,13 +253,13 @@ resource "google_compute_firewall" "velos-workload" {
 resource "google_service_account" "velos-manager" {
   account_id   = "velos-manager"
   display_name = "velos-manager"
-  project      = var.project_id
+  project      = module.velos-project.project_id
 }
 
 resource "google_service_account" "velos-cloud-extension" {
   account_id   = "velos-cloud-extension"
   display_name = "velos-cloud-extension"
-  project      = var.project_id
+  project      = module.velos-project.project_id
 }
 
 /******************************************
@@ -266,7 +268,7 @@ resource "google_service_account" "velos-cloud-extension" {
 #replaced IAM module due to for_each error.
 resource "google_project_iam_binding" "iam" {
   count   = length(local.bindings)
-  project = var.project_id
+  project = module.velos-project.project_id
   role    = local.bindings[count.index].role
   members = local.bindings[count.index].members
 }

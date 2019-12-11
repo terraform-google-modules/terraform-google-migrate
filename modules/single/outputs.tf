@@ -15,7 +15,7 @@
  */
 
 output "project_id" {
-  value       = var.project_id
+  value       = module.velos-project.project_id
   description = "The ID of the project"
 }
 

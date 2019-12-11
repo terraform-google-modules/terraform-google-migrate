@@ -92,21 +92,6 @@ variable "subnet_03_ip" {
   #default    = ""
 }
 
-variable "secondary_s01_range" {
-  description = "Secondary IP range for the subnet"
-  #default    = ""
-}
-
-variable "secondary_s02_range" {
-  description = "Secondary IP range for the subnet"
-  #default    = ""
-}
-
-variable "secondary_s03_range" {
-  description = "Secondary IP range for the subnet"
-  #default    = ""
-}
-
 variable "subnet_01_region" {
   description = "Region of subnet 1"
   #default    = ""
