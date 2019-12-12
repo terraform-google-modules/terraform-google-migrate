@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-locals {
-  credentials_file_path = var.credentials_path
-}
 /*****************************************
   Folder Structure
  *****************************************/
@@ -43,7 +40,6 @@ module "velos-multi-project" {
   velo_folder_id     = split("/", module.migration-folders.ids["shared"])[1]
   prod_folder_id     = split("/", module.migration-folders.ids["prod"])[1]
   nonprod_folder_id  = split("/", module.migration-folders.ids["nonprod"])[1]
-  credentials_path   = var.credentials_path
   subnet_01_ip       = var.subnet_01_ip
   subnet_02_ip       = var.subnet_02_ip
   subnet_03_ip       = var.subnet_03_ip

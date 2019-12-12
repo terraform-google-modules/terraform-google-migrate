@@ -22,11 +22,6 @@ variable "billing_account" {
   description = "The ID of the billing account to associate this project with"
 }
 
-variable "credentials_path" {
-  description = "Path to a service account credentials file with rights to run the Project Factory. If this file is absent Terraform will fall back to Application Default Credentials."
-  default     = "~/.config/gcloud/application_default_credentials.json"
-}
-
 variable "all_folder_admins" {
   type        = list(string)
   description = "List of IAM-style members that will get the extended permissions across all the folders."

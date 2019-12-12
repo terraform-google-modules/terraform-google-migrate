@@ -64,7 +64,6 @@ module "velos-project" {
   name                    = var.project_name == "" ? "velos-core-project-${random_string.suffix.result}" : var.project_name
   org_id                  = var.organization_id
   billing_account         = var.billing_account
-  credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   folder_id               = var.folder_id
   activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]

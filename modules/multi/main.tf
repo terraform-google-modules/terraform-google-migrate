@@ -250,7 +250,6 @@ module "vpc-project" {
   org_id                  = var.organization_id
   folder_id               = var.velo_folder_id
   billing_account         = var.billing_account
-  credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }
@@ -262,7 +261,6 @@ module "velo-project" {
   org_id                  = var.organization_id
   folder_id               = var.velo_folder_id
   billing_account         = var.billing_account
-  credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }
@@ -274,7 +272,6 @@ module "prod-project" {
   org_id                  = var.organization_id
   folder_id               = var.prod_folder_id
   billing_account         = var.billing_account
-  credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }
@@ -286,7 +283,6 @@ module "nonprod-project" {
   org_id                  = var.organization_id
   folder_id               = var.nonprod_folder_id
   billing_account         = var.billing_account
-  credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }

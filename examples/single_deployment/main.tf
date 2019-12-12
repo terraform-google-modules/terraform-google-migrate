@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-locals {
-  credentials_file_path = var.credentials_path
-}
+
 /*****************************************
   Folder Structure
  *****************************************/
@@ -38,7 +36,6 @@ module "velos-single-project" {
   source             = "../../modules/single"
   organization_id    = var.organization_id
   billing_account    = var.billing_account
-  credentials_path   = var.credentials_path
   folder_id          = split("/", module.migration-folders.ids["velos"])[1]
   subnet_01_ip       = var.subnet_01_ip
   subnet_02_ip       = var.subnet_02_ip
