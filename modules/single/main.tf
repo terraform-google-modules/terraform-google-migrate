@@ -67,11 +67,7 @@ module "velos-project" {
   credentials_path        = var.credentials_path
   default_service_account = var.default_service_account
   folder_id               = var.folder_id
-  #bucket_location         = "europe-west1"
-  #bucket_name             = "terraform-state"
-  #bucket_project          = var.project_name
-  #auto_create_network     = "false"
-  activate_apis = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
+  activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }
 ###############################################################################
 #                          Networking (VPCs, Firewalls)

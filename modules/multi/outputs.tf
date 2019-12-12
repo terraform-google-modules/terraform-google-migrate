@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+output "shared_vpc_project_id" {
+  value       = module.vpc-project.project_id
+  description = "The ID of the shared vpc project"
+}
+
 output "velos_project_id" {
   value       = module.velo-project.project_id
   description = "The ID of the velo project"
@@ -24,14 +29,9 @@ output "prod_project_id" {
   description = "The ID of the prod project"
 }
 
-output "stage_project_id" {
-  value       = module.stage-project.project_id
-  description = "The ID of the stage project"
-}
-
-output "test_project_id" {
-  value       = module.test-project.project_id
-  description = "The ID of the test project"
+output "non_prod_project_id" {
+  value       = module.nonprod-project.project_id
+  description = "The ID of the nonpod project"
 }
 
 output "network_name" {

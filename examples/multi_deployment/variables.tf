@@ -27,6 +27,12 @@ variable "credentials_path" {
   default     = "~/.config/gcloud/application_default_credentials.json"
 }
 
+variable "environments" {
+  type        = list(string)
+  description = "List of folders to be created in addition to VPC Shared project and Velostrata Project"
+  default     = ["prod", "nonprod"]
+}
+
 variable "all_folder_admins" {
   type        = list(string)
   description = "List of IAM-style members that will get the extended permissions across all the folders."
@@ -49,18 +55,6 @@ variable "subnet_02_ip" {
 
 variable "subnet_03_ip" {
   description = "IP range for the subnet"
-}
-
-variable "secondary_s01_range" {
-  description = "Secondary IP range for the subnet"
-}
-
-variable "secondary_s02_range" {
-  description = "Secondary IP range for the subnet"
-}
-
-variable "secondary_s03_range" {
-  description = "Secondary IP range for the subnet"
 }
 
 variable "subnet_01_region" {

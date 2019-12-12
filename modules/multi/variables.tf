@@ -32,6 +32,11 @@ variable "default_service_account" {
   default     = "depriviledge"
 }
 
+variable "vpc_project_name" {
+  description = "Shared VPC GCP Project Name"
+  default     = ""
+}
+
 variable "velo_project_name" {
   description = "Velostrata GCP Project Name"
   default     = ""
@@ -42,16 +47,13 @@ variable "prod_project_name" {
   default     = ""
 }
 
-variable "stage_project_name" {
-  description = "Staging GCP Project Name"
+variable "nonprod_project_name" {
+  description = "Nonprod GCP Project Name"
   default     = ""
 }
-
-variable "test_project_name" {
-  description = "Test GCP Project Name"
-  default     = ""
+variable "vpc_folder_id" {
+  description = "Shared VPC Folder ID"
 }
-
 variable "velo_folder_id" {
   description = "Velostrata Folder ID"
 }
@@ -60,21 +62,12 @@ variable "prod_folder_id" {
   description = "Production Folder ID"
 }
 
-variable "stg_folder_id" {
-  description = "Staging Folder ID"
+variable "nonprod_folder_id" {
+  description = "Nonprod Folder ID"
 }
-
-variable "test_folder_id" {
-  description = "Test Folder ID"
-}
-
 variable "network_name" {
   description = "Name for Shared VPC network"
   default     = "velo-network"
-}
-
-variable "vpc_project_id" {
-  description = "Project ID for Shared VPC hosting GCP project"
 }
 
 variable "subnet_01_ip" {

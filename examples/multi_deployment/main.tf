@@ -25,48 +25,32 @@ module "migration-folders" {
   version = "~> 2.0"
   # parent = "organizations/${var.organization_id}"
   parent            = "folders/619261348000"
-  names             = ["core-project", "velo", "prod", "stg", "test"]
+  names             = concat(["shared"], var.environments)
   set_roles         = true
   per_folder_admins = var.per_folder_admins
   all_folder_admins = var.all_folder_admins
 }
 
 /*****************************************
-  Core Project
- *****************************************/
-
-module "core-project" {
-  source           = "../../modules/core"
-  organization_id  = var.organization_id
-  billing_account  = var.billing_account
-  credentials_path = var.credentials_path
-  folder_id        = split("/", module.migration-folders.ids["core-project"])[1]
-}
-
-/*****************************************
-  Velostrata Single Project Deployment
+  Velostrata Multi Project Deployment
  *****************************************/
 
 module "velos-multi-project" {
-  source              = "../../modules/multi"
-  organization_id     = var.organization_id
-  billing_account     = var.billing_account
-  vpc_project_id      = module.core-project.project_id
-  velo_folder_id      = split("/", module.migration-folders.ids["velo"])[1]
-  prod_folder_id      = split("/", module.migration-folders.ids["prod"])[1]
-  stg_folder_id       = split("/", module.migration-folders.ids["stg"])[1]
-  test_folder_id      = split("/", module.migration-folders.ids["test"])[1]
-  credentials_path    = var.credentials_path
-  subnet_01_ip        = var.subnet_01_ip
-  subnet_02_ip        = var.subnet_02_ip
-  subnet_03_ip        = var.subnet_03_ip
-  secondary_s01_range = var.secondary_s01_range
-  secondary_s02_range = var.secondary_s02_range
-  secondary_s03_range = var.secondary_s03_range
-  subnet_01_region    = var.subnet_01_region
-  subnet_02_region    = var.subnet_02_region
-  subnet_03_region    = var.subnet_03_region
-  local_subnet_01_ip  = var.local_subnet_01_ip
+  source             = "../../modules/multi"
+  organization_id    = var.organization_id
+  billing_account    = var.billing_account
+  vpc_folder_id      = split("/", module.migration-folders.ids["shared"])[1]
+  velo_folder_id     = split("/", module.migration-folders.ids["shared"])[1]
+  prod_folder_id     = split("/", module.migration-folders.ids["prod"])[1]
+  nonprod_folder_id  = split("/", module.migration-folders.ids["nonprod"])[1]
+  credentials_path   = var.credentials_path
+  subnet_01_ip       = var.subnet_01_ip
+  subnet_02_ip       = var.subnet_02_ip
+  subnet_03_ip       = var.subnet_03_ip
+  subnet_01_region   = var.subnet_01_region
+  subnet_02_region   = var.subnet_02_region
+  subnet_03_region   = var.subnet_03_region
+  local_subnet_01_ip = var.local_subnet_01_ip
 
 }
 /*****************************************
@@ -74,7 +58,7 @@ module "velos-multi-project" {
  *****************************************/
 module "velos-vpn" {
   source        = "../../modules/networking/vpn"
-  project_id    = module.core-project.project_id
+  project_id    = module.velos-multi-project.shared_vpc_project_id
   network       = module.velos-multi-project.network_name
   router_region = var.router_region
   vpn_region    = var.vpn_region
