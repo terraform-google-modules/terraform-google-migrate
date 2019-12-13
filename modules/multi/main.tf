@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-resource "random_string" "suffix" {
-  length  = 4
-  special = false
-  upper   = false
-}
-
 ###############################################################################
 #                          Networking (VPCs, Firewalls)
 ###############################################################################
 
 locals {
-  subnet_01 = "${var.network_name}-subnet-01"
-  subnet_02 = "${var.network_name}-subnet-02"
-  subnet_03 = "${var.network_name}-subnet-03"
   bindings = [
     { role    = "roles/iam.serviceAccountTokenCreator"
       members = ["serviceAccount:${google_service_account.velos-manager.email}"]
@@ -62,7 +53,7 @@ locals {
 
 module "vpc" {
   source  = "terraform-google-modules/network/google"
-  version = "~> 1.4.3"
+  version = "~> 2.0"
 
   project_id   = module.vpc-project.project_id
   network_name = var.network_name
@@ -72,19 +63,19 @@ module "vpc" {
 
   subnets = [
     {
-      subnet_name   = local.subnet_01
+      subnet_name   = "${var.network_name}-subnet-01"
       subnet_ip     = var.subnet_01_ip
       subnet_region = var.subnet_01_region
     },
     {
-      subnet_name           = local.subnet_02
+      subnet_name           = "${var.network_name}-subnet-02"
       subnet_ip             = var.subnet_02_ip
       subnet_region         = var.subnet_02_region
       subnet_private_access = "true"
       subnet_flow_logs      = "true"
     },
     {
-      subnet_name           = local.subnet_03
+      subnet_name           = "${var.network_name}-subnet-03"
       subnet_ip             = var.subnet_03_ip
       subnet_region         = var.subnet_03_region
       subnet_private_access = "true"
@@ -102,9 +93,9 @@ module "net-shared-vpc-access" {
   host_subnets        = module.vpc.subnets_names
   host_subnet_regions = [var.subnet_01_region, var.subnet_02_region, var.subnet_03_region]
   host_subnet_users = {
-    "${local.subnet_01}" = "serviceAccount:${module.velo-project.service_account_email},serviceAccount:${module.prod-project.service_account_email},serviceAccount:${module.nonprod-project.service_account_email}"
-    "${local.subnet_02}" = "serviceAccount:${module.velo-project.service_account_email},serviceAccount:${module.prod-project.service_account_email},serviceAccount:${module.nonprod-project.service_account_email}"
-    "${local.subnet_03}" = "serviceAccount:${module.velo-project.service_account_email},serviceAccount:${module.prod-project.service_account_email},serviceAccount:${module.nonprod-project.service_account_email}"
+    "${var.network_name}-subnet-01" = "serviceAccount:${module.velo-project.service_account_email},serviceAccount:${module.prod-project.service_account_email},serviceAccount:${module.nonprod-project.service_account_email}"
+    "${var.network_name}-subnet-02" = "serviceAccount:${module.velo-project.service_account_email},serviceAccount:${module.prod-project.service_account_email},serviceAccount:${module.nonprod-project.service_account_email}"
+    "${var.network_name}-subnet-03" = "serviceAccount:${module.velo-project.service_account_email},serviceAccount:${module.prod-project.service_account_email},serviceAccount:${module.nonprod-project.service_account_email}"
   }
   host_service_agent_role = true
   host_service_agent_users = [
@@ -244,47 +235,47 @@ resource "google_compute_firewall" "velos-workload" {
 #                          Projects
 ###############################################################################
 module "vpc-project" {
-  source                  = "terraform-google-modules/project-factory/google"
-  version                 = "~> 5.0"
-  name                    = var.velo_project_name == "" ? "shared-vpc-project-${random_string.suffix.result}" : var.velo_project_name
-  org_id                  = var.organization_id
-  folder_id               = var.velo_folder_id
-  billing_account         = var.billing_account
-  default_service_account = var.default_service_account
-  activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
+  source            = "terraform-google-modules/project-factory/google"
+  version           = "~> 6.0"
+  name              = "${var.project_prefix}-${var.velo_project_name}"
+  random_project_id = "true"
+  org_id            = var.organization_id
+  folder_id         = var.velo_folder_id
+  billing_account   = var.billing_account
+  activate_apis     = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }
 
 module "velo-project" {
-  source                  = "terraform-google-modules/project-factory/google"
-  version                 = "~> 5.0"
-  name                    = var.velo_project_name == "" ? "velos-project-${random_string.suffix.result}" : var.velo_project_name
-  org_id                  = var.organization_id
-  folder_id               = var.velo_folder_id
-  billing_account         = var.billing_account
-  default_service_account = var.default_service_account
-  activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
+  source            = "terraform-google-modules/project-factory/google"
+  version           = "~> 6.0"
+  name              = "${var.project_prefix}-${var.velo_project_name}"
+  random_project_id = "true"
+  org_id            = var.organization_id
+  folder_id         = var.velo_folder_id
+  billing_account   = var.billing_account
+  activate_apis     = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }
 
 module "prod-project" {
-  source                  = "terraform-google-modules/project-factory/google"
-  version                 = "~> 5.0"
-  name                    = var.prod_project_name == "" ? "prod-project-${random_string.suffix.result}" : var.prod_project_name
-  org_id                  = var.organization_id
-  folder_id               = var.prod_folder_id
-  billing_account         = var.billing_account
-  default_service_account = var.default_service_account
-  activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
+  source            = "terraform-google-modules/project-factory/google"
+  version           = "~> 6.0"
+  name              = "${var.project_prefix}-${var.prod_project_name}"
+  random_project_id = "true"
+  org_id            = var.organization_id
+  folder_id         = var.prod_folder_id
+  billing_account   = var.billing_account
+  activate_apis     = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }
 
 module "nonprod-project" {
-  source                  = "terraform-google-modules/project-factory/google"
-  version                 = "~> 5.0"
-  name                    = var.nonprod_project_name == "" ? "nonprod-project-${random_string.suffix.result}" : var.nonprod_project_name
-  org_id                  = var.organization_id
-  folder_id               = var.nonprod_folder_id
-  billing_account         = var.billing_account
-  default_service_account = var.default_service_account
-  activate_apis           = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
+  source            = "terraform-google-modules/project-factory/google"
+  version           = "~> 6.0"
+  name              = "${var.project_prefix}-${var.nonprod_project_name}"
+  random_project_id = "true"
+  org_id            = var.organization_id
+  folder_id         = var.nonprod_folder_id
+  billing_account   = var.billing_account
+  activate_apis     = ["iam.googleapis.com", "cloudresourcemanager.googleapis.com", "compute.googleapis.com", "storage-component.googleapis.com", "logging.googleapis.com", "monitoring.googleapis.com"]
 }
 
 ###############################################################################

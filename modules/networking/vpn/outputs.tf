@@ -22,6 +22,7 @@ output "ipsec_secret-dynamic" {
   description = "The secret"
   value       = module.vpn_dynamic.ipsec_secret-dynamic
 }
+
 output "gateway_ip" {
   description = "The VPN Gateway Public IP"
   value       = module.vpn_dynamic.gateway_ip

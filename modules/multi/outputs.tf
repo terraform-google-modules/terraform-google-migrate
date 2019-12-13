@@ -43,6 +43,7 @@ output "velos_migration_manager_svc" {
   value       = google_service_account.velos-manager.email
   description = "Service account for Manager Service"
 }
+
 output "velos_compute_engine_cloud_extension_svc" {
   value       = google_service_account.velos-cloud-extension.email
   description = "Service account for Compute Engine Cloud Extension"

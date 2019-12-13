@@ -52,6 +52,7 @@ module "velos-multi-project" {
 /*****************************************
   VPN
  *****************************************/
+
 module "velos-vpn" {
   source        = "../../modules/networking/vpn"
   project_id    = module.velos-multi-project.shared_vpc_project_id

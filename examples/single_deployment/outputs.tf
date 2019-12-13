@@ -39,7 +39,6 @@ output "velos_compute_engine_cloud_extension_svc" {
   value       = module.velos-single-project.velos_compute_engine_cloud_extension_svc
 }
 
-
 output "vpc_tunnel_name" {
   description = "The VPN tunnel name is"
   value       = module.velos-vpn.vpn_tunnels_names-dynamic

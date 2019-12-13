@@ -22,29 +22,29 @@ variable "billing_account" {
   description = "The ID of the billing account to associate this projects with"
 }
 
-variable "default_service_account" {
-  description = "Project default service account setting: can be one of `delete`, `depriviledge`, or `keep`."
-  default     = "depriviledge"
+variable "project_prefix" {
+  description = "Prefix to append to all project"
+  default     = "multi-dep"
 }
 
 variable "vpc_project_name" {
   description = "Shared VPC GCP Project Name"
-  default     = ""
+  default     = "shared-vpc-proj"
 }
 
 variable "velo_project_name" {
   description = "Velostrata GCP Project Name"
-  default     = ""
+  default     = "velostrata-proj"
 }
 
 variable "prod_project_name" {
   description = "Production GCP Project Name"
-  default     = ""
+  default     = "prod-proj"
 }
 
 variable "nonprod_project_name" {
   description = "Nonprod GCP Project Name"
-  default     = ""
+  default     = "nonprod-proj"
 }
 variable "vpc_folder_id" {
   description = "Shared VPC Folder ID"

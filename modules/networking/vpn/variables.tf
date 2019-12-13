@@ -37,6 +37,7 @@ variable "router_name" {
   description = "The name for the router"
   default     = "router-vm-migrate"
 }
+
 variable "gateway_name" {
   type        = string
   description = "The name of VPN gateway"
