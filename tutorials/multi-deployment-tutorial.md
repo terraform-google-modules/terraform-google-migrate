@@ -23,9 +23,14 @@ We will be using the multi_deployment example in this walkthrough.
 cd terraform-google-migrate/examples/multi_deployment
 ```
 
-## Creating the service account
+## Assign permissions to the account running this Terraform script
 
-TODO: Make a shell script to automate this.
+The account running the Terraform script needs these permissions:
+
+- Organization Role Administrator
+- Organization Administrator
+- Compute Admin
+- (Project) Owner
 
 ## Exploring the Terraform code and setting variables
 
