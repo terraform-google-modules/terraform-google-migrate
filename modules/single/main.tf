@@ -15,9 +15,6 @@
  */
 
 locals {
-  subnet_01 = "${var.network_name}-subnet-01"
-  subnet_02 = "${var.network_name}-subnet-02"
-  subnet_03 = "${var.network_name}-subnet-03"
   bindings = [
     { role    = "roles/iam.serviceAccountTokenCreator"
       members = ["serviceAccount:${google_service_account.velos-manager.email}"]
@@ -88,19 +85,19 @@ module "vpc" {
 
   subnets = [
     {
-      subnet_name   = local.subnet_01
+      subnet_name   = "${var.network_name}-subnet-01"
       subnet_ip     = var.subnet_01_ip
       subnet_region = var.subnet_01_region
     },
     {
-      subnet_name           = local.subnet_02
+      subnet_name           = "${var.network_name}-subnet-02"
       subnet_ip             = var.subnet_02_ip
       subnet_region         = var.subnet_01_region
       subnet_private_access = "true"
       subnet_flow_logs      = "false"
     },
     {
-      subnet_name           = local.subnet_03
+      subnet_name           = "${var.network_name}-subnet-03"
       subnet_ip             = var.subnet_03_ip
       subnet_region         = var.subnet_01_region
       subnet_private_access = "true"

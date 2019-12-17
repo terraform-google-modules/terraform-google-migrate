@@ -24,27 +24,27 @@ variable "billing_account" {
 
 variable "project_prefix" {
   description = "Prefix to append to all project"
-  default     = "multi-dep"
+  default     = "multi-"
 }
 
 variable "vpc_project_name" {
   description = "Shared VPC GCP Project Name"
-  default     = "shared-vpc-proj"
+  default     = "shared-network"
 }
 
 variable "velo_project_name" {
   description = "Velostrata GCP Project Name"
-  default     = "velostrata-proj"
+  default     = "shared-migrate"
 }
 
 variable "prod_project_name" {
   description = "Production GCP Project Name"
-  default     = "prod-proj"
+  default     = "prod-core"
 }
 
 variable "nonprod_project_name" {
   description = "Nonprod GCP Project Name"
-  default     = "nonprod-proj"
+  default     = "nonprod-core"
 }
 variable "vpc_folder_id" {
   description = "Shared VPC Folder ID"

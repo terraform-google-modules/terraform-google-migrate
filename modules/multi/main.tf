@@ -237,7 +237,7 @@ resource "google_compute_firewall" "velos-workload" {
 module "vpc-project" {
   source            = "terraform-google-modules/project-factory/google"
   version           = "~> 6.0"
-  name              = "${var.project_prefix}-${var.velo_project_name}"
+  name              = "${var.project_prefix}-${var.vpc_project_name}"
   random_project_id = "true"
   org_id            = var.organization_id
   folder_id         = var.velo_folder_id
