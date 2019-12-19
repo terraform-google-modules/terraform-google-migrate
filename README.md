@@ -14,7 +14,7 @@
  limitations under the License.
 ----->
 
-# CFT Migrate for Compute Engine (Migrate for Compute Engine)
+# CFT Landing Zone (Migrate for Compute Engine)
 
 Using Cloud Foundation Toolkit (CFT) you can quickly deploy a landing zone for your [Migrate for Compute Engine](https://cloud.google.com/migrate/compute-engine/) migration to Google Cloud Platform (GCP) projects, save time and avoid misconfiguration issues.
 
