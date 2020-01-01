@@ -48,3 +48,19 @@ output "gateway_ip" {
   description = "The VPN Gateway Public IP"
   value       = module.velos-vpn.gateway_ip
 }
+
+output "velos_vm_ui" {
+  value       = module.velos-single-project.velos_vm_ui
+  description = "URL for Velostrata Manger"
+}
+
+output "velos_manager_username" {
+  value       = module.velos-single-project.velos_manager_username
+  description = "Username for Velostrata Manger"
+}
+
+output "velos_manager_password" {
+  value       = module.velos-single-project.velos_manager_password
+  sensitive   = true
+  description = "Password for Velostrata Manger"
+}
