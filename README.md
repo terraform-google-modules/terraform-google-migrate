@@ -18,6 +18,13 @@
 
 Using Cloud Foundation Toolkit (CFT) you can quickly deploy a landing zone for your [Migrate for Compute Engine](https://cloud.google.com/migrate/compute-engine/) migration to Google Cloud Platform (GCP) projects, save time and avoid misconfiguration issues.
 
+## Google Cloud Shell Walkthrough
+A Google Cloud Shell Walkthrough has been setup to make it easy for users who are new to Migrate and Terraform. This walkthrough provides a set of instructions to get a default installation of Migrate setup that can be used in a production environment.
+
+If you are familiar with Terraform and would like to run Terraform from a different machine, you can skip this walkthrough and move onto the [Deployment](#Deployment-Type) section.
+
+[![Open in Google Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/terraform-google-modules/terraform-google-migrate&tutorial=tutorials/multi-deployment-tutorial.md)
+
 ## Migrate for Compute Engine Prerequisites
 
 ### Migration Qualification
