@@ -1,82 +1,65 @@
-# terraform-google-migrate
+<!-----
+ Copyright 2018 Google LLC
 
-This module was generated from [terraform-google-module-template](https://github.com/terraform-google-modules/terraform-google-module-template/), which by default generates a module that simply creates a GCS bucket. As the module develops, this README should be updated.
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
 
-The resources/services/activations/deletions that this module will create/trigger are:
+      http://www.apache.org/licenses/LICENSE-2.0
 
-- Create a GCS bucket with the provided name
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+----->
 
-## Usage
+# CFT Landing Zone (Migrate for Compute Engine)
 
-Basic usage of this module is as follows:
+Using Cloud Foundation Toolkit (CFT) you can quickly deploy a landing zone for your [Migrate for Compute Engine](https://cloud.google.com/migrate/compute-engine/) migration to Google Cloud Platform (GCP) projects, save time and avoid misconfiguration issues.
 
-```hcl
-module "migrate" {
-  source  = "terraform-google-modules/migrate/google"
-  version = "~> 0.1"
+## Migrate for Compute Engine Prerequisites
 
-  project_id  = "<PROJECT ID>"
-  bucket_name = "gcs-test-bucket"
-}
-```
+### Migration Qualification
 
-Functional examples are included in the
-[examples](./examples/) directory.
+Before proceeding with migration, you should already know:
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-## Inputs
+1.  How many approximately VMs will be migrated
+2.  What is migration target VMs source - Azure, AWS or on-prem
+3.  How many GCP projects you will need for migrated VMs
+4.  Do you have/plan on-prem or other cloud connection to GCP via [VPN](https://cloud.google.com/vpn/docs/concepts/overview) / [Interconnect](https://cloud.google.com/hybrid-connectivity/)
+5.  Is there any network load balancing involved
+6.  How much storage will be needed in GCP
 
-| Name | Description | Type | Default | Required |
-|------|-------------|:----:|:-----:|:-----:|
-| bucket\_name | The name of the bucket to create | string | n/a | yes |
-| project\_id | The project ID to deploy to | string | n/a | yes |
+### Deployment Type
 
-## Outputs
+There are two types of deployment that you can choose from using CFT for Migrate for Compute Engine:
 
-| Name | Description |
-|------|-------------|
-| bucket\_name |  |
+**Single-project** deployment where Migrate for Compute Engine frontend, Cloud Extension and migrated VMs hosted under the same GCP project:
 
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+![Single Project](images/cft-velo-single.png)
 
-## Requirements
+**Multi-project** deployment, environment is split into four or more different GCP projects to host separated shared VPC, Migrate for Compute Engine frontend and migrated VMs:
 
-These sections describe requirements for using this module.
+![Multi Project](images/cft-velo-multi.png)
 
-### Software
+**Example** of high level architecture for a multi project landing zone:
 
-The following dependencies must be available:
+![Example Solution](images/cft-velo-solution.png)
 
-- [Terraform][terraform] v0.12
-- [Terraform Provider for GCP][terraform-provider-gcp] plugin v2.0
+### Technical Prerequisites
 
-### Service Account
+CFT for Migrate for Compute Engine is build on top of [Google Cloud Project Factory Terraform Module](https://github.com/terraform-google-modules/terraform-google-project-factory) and if additional customization needed please refer to the [documentation](https://github.com/terraform-google-modules/terraform-google-project-factory/blob/master/README.md).
 
-A service account with the following roles must be used to provision
-the resources of this module:
+You will create the following via CFT and Terraform:
 
-- Storage Admin: `roles/storage.admin`
+1.  GCP project to host Migrate for Compute Engine Manager and Cloud Extensions (CE)
+1.  GCP VPC Project (if shared VPC will be used)
+1.  VPC with subnets
+1.  [Firewall rules](https://cloud.google.com/migrate/compute-engine/docs/4.5/concepts/planning-a-migration/network-access-requirements) for Migrate for Compute Engine
+1.  GCP Network Tags for Migrate for Compute Engine
+1.  Destination Projects
+1.  GCP [roles and service accounts](https://cloud.google.com/migrate/compute-engine/docs/4.5/how-to/configuring-gcp/configuring-gcp-manually) for Migrate for Compute Engine
+1.  VPN (Optional)
 
-The [Project Factory module][project-factory-module] and the
-[IAM module][iam-module] may be used in combination to provision a
-service account with the necessary roles applied.
-
-### APIs
-
-A project with the following APIs enabled must be used to host the
-resources of this module:
-
-- Google Cloud Storage JSON API: `storage-api.googleapis.com`
-
-The [Project Factory module][project-factory-module] can be used to
-provision a project with the necessary APIs enabled.
-
-## Contributing
-
-Refer to the [contribution guidelines](./CONTRIBUTING.md) for
-information on contributing to this module.
-
-[iam-module]: https://registry.terraform.io/modules/terraform-google-modules/iam/google
-[project-factory-module]: https://registry.terraform.io/modules/terraform-google-modules/project-factory/google
-[terraform-provider-gcp]: https://www.terraform.io/docs/providers/google/index.html
-[terraform]: https://www.terraform.io/downloads.html
+Finally [deploying](https://cloud.google.com/migrate/compute-engine/docs/4.5/how-to/configure-manager/configuring-on-gcp) Migrate for Compute Engine Manager via GCP [Marketplace](https://console.cloud.google.com/marketplace/details/click-to-deploy-images/velostrata?_ga=2.230596124.-1830265044.1554384916&_gac=1.75634663.1564563946.CL6bne_m3uMCFYYkGwodLkkPoQ).
