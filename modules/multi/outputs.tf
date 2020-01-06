@@ -49,3 +49,18 @@ output "velos_compute_engine_cloud_extension_svc" {
   description = "Service account for Compute Engine Cloud Extension"
 }
 
+output "velos_vm_ui" {
+  value       = module.velos-manager-vm.velos_vm_ui
+  description = "URL for Velostrata Manger"
+}
+
+output "velos_manager_username" {
+  value       = module.velos-manager-vm.velos_manager_username
+  description = "Username for Velostrata Manger"
+}
+
+output "velos_manager_password" {
+  value       = module.velos-manager-vm.velos_manager_password
+  sensitive   = true
+  description = "Password for Velostrata Manger"
+}

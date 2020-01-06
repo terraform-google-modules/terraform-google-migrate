@@ -58,8 +58,7 @@ module "vpc" {
   project_id   = module.vpc-project.project_id
   network_name = var.network_name
 
-  delete_default_internet_gateway_routes = "false"
-  shared_vpc_host                        = "true"
+  shared_vpc_host = "true"
 
   subnets = [
     {
@@ -236,7 +235,7 @@ resource "google_compute_firewall" "velos-workload" {
 ###############################################################################
 module "vpc-project" {
   source            = "terraform-google-modules/project-factory/google"
-  version           = "~> 6.0"
+  version           = "6.0"
   name              = "${var.project_prefix}-${var.vpc_project_name}"
   random_project_id = "true"
   org_id            = var.organization_id
@@ -247,7 +246,7 @@ module "vpc-project" {
 
 module "velo-project" {
   source            = "terraform-google-modules/project-factory/google"
-  version           = "~> 6.0"
+  version           = "6.0"
   name              = "${var.project_prefix}-${var.velo_project_name}"
   random_project_id = "true"
   org_id            = var.organization_id
@@ -258,7 +257,7 @@ module "velo-project" {
 
 module "prod-project" {
   source            = "terraform-google-modules/project-factory/google"
-  version           = "~> 6.0"
+  version           = "6.0"
   name              = "${var.project_prefix}-${var.prod_project_name}"
   random_project_id = "true"
   org_id            = var.organization_id
@@ -269,7 +268,7 @@ module "prod-project" {
 
 module "nonprod-project" {
   source            = "terraform-google-modules/project-factory/google"
-  version           = "~> 6.0"
+  version           = "6.0"
   name              = "${var.project_prefix}-${var.nonprod_project_name}"
   random_project_id = "true"
   org_id            = var.organization_id
@@ -334,4 +333,24 @@ resource "google_project_iam_binding" "vpc-velo-proj-cloud-services-svc" {
   project = module.vpc-project.project_id
   role    = "roles/compute.networkUser"
   members = ["serviceAccount:${module.velo-project.project_number}@cloudservices.gserviceaccount.com"]
+}
+
+/******************************************
+Velostrata Manager VM
+ *****************************************/
+data "google_compute_zones" "available" {
+  project = module.velo-project.project_id
+  region  = var.subnet_01_region
+}
+
+module "velos-manager-vm" {
+  source                       = "../velostrata-manager-vm"
+  project_id                   = module.net-shared-vpc-access.service_projects[index(module.net-shared-vpc-access.service_projects, module.velo-project.project_id)]
+  subnet_name                  = module.vpc.subnets_names[index(module.vpc.subnets_names, "${var.network_name}-subnet-01")]
+  subnet_project               = module.vpc-project.project_id
+  cloud_extension_svc_email    = google_service_account.velos-cloud-extension.email
+  velos_manager_svc_email      = google_service_account.velos-manager.email
+  velostrata_vm_zone           = data.google_compute_zones.available.names[0]
+  velostrata_vm_password       = var.velostrata_vm_password
+  velostrata_vm_encryption_key = var.velostrata_vm_encryption_key
 }

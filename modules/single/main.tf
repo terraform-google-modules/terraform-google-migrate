@@ -80,8 +80,7 @@ module "vpc" {
   project_id   = module.velos-project.project_id
   network_name = var.network_name
 
-  delete_default_internet_gateway_routes = "true"
-  shared_vpc_host                        = "false"
+  shared_vpc_host = "false"
 
   subnets = [
     {
@@ -263,4 +262,24 @@ resource "google_project_iam_binding" "iam" {
   project = module.velos-project.project_id
   role    = local.bindings[count.index].role
   members = local.bindings[count.index].members
+}
+
+/******************************************
+Velostrata Manager VM
+ *****************************************/
+data "google_compute_zones" "available" {
+  project = module.velos-project.project_id
+  region  = var.subnet_01_region
+}
+
+module "velos-manager-vm" {
+  source                       = "../velostrata-manager-vm"
+  project_id                   = module.velos-project.project_id
+  subnet_name                  = module.vpc.subnets_names[index(module.vpc.subnets_names, "${var.network_name}-subnet-01")]
+  subnet_project               = module.velos-project.project_id
+  cloud_extension_svc_email    = google_service_account.velos-cloud-extension.email
+  velos_manager_svc_email      = google_service_account.velos-manager.email
+  velostrata_vm_zone           = data.google_compute_zones.available.names[0]
+  velostrata_vm_password       = var.velostrata_vm_password
+  velostrata_vm_encryption_key = var.velostrata_vm_encryption_key
 }

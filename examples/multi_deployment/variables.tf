@@ -18,6 +18,11 @@ variable "organization_id" {
   description = "The organization id for the associated services"
 }
 
+variable "parent_folder" {
+  description = "The parent folder under which resources should be created"
+  default     = null
+}
+
 variable "billing_account" {
   description = "The ID of the billing account to associate this project with"
 }
@@ -79,4 +84,12 @@ variable "router_region" {
 
 variable "vpn_region" {
   description = "The region in which you want to create the VPN gateway"
+}
+
+variable "velostrata_vm_password" {
+  description = "Password to login for Velostrata Frontend"
+}
+
+variable "velostrata_vm_encryption_key" {
+  description = "Encryption key for Velostrata Frontend"
 }

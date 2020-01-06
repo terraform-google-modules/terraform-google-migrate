@@ -77,3 +77,11 @@ variable "local_subnet_01_ip" {
   description = "IP range of the on-prem network"
   #default    = ""
 }
+
+variable "velostrata_vm_password" {
+  description = "Password to login for Velostrata Frontend"
+}
+
+variable "velostrata_vm_encryption_key" {
+  description = "Encryption key for Velostrata Frontend"
+}
