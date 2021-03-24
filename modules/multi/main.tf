@@ -53,7 +53,7 @@ locals {
 
 module "vpc" {
   source  = "terraform-google-modules/network/google"
-  version = "~> 2.0"
+  version = "~> 3.0"
 
   project_id   = module.vpc-project.project_id
   network_name = var.network_name
@@ -86,7 +86,9 @@ module "vpc" {
 }
 
 module "net-shared-vpc-access" {
-  source              = "terraform-google-modules/network/google//modules/fabric-net-svpc-access"
+  source  = "terraform-google-modules/network/google//modules/fabric-net-svpc-access"
+  version = "~> 3.0"
+
   host_project_id     = module.vpc-project.project_id
   service_project_num = 3
   service_project_ids = [module.velo-project.project_id, module.prod-project.project_id, module.nonprod-project.project_id]
@@ -236,7 +238,7 @@ resource "google_compute_firewall" "velos-workload" {
 ###############################################################################
 module "vpc-project" {
   source            = "terraform-google-modules/project-factory/google"
-  version           = "~> 6.0"
+  version           = "~> 10.0"
   name              = "${var.project_prefix}-${var.vpc_project_name}"
   random_project_id = "true"
   org_id            = var.organization_id
@@ -247,7 +249,7 @@ module "vpc-project" {
 
 module "velo-project" {
   source            = "terraform-google-modules/project-factory/google"
-  version           = "~> 6.0"
+  version           = "~> 10.0"
   name              = "${var.project_prefix}-${var.velo_project_name}"
   random_project_id = "true"
   org_id            = var.organization_id
@@ -258,7 +260,7 @@ module "velo-project" {
 
 module "prod-project" {
   source            = "terraform-google-modules/project-factory/google"
-  version           = "~> 6.0"
+  version           = "~> 10.0"
   name              = "${var.project_prefix}-${var.prod_project_name}"
   random_project_id = "true"
   org_id            = var.organization_id
@@ -269,7 +271,7 @@ module "prod-project" {
 
 module "nonprod-project" {
   source            = "terraform-google-modules/project-factory/google"
-  version           = "~> 6.0"
+  version           = "~> 10.0"
   name              = "${var.project_prefix}-${var.nonprod_project_name}"
   random_project_id = "true"
   org_id            = var.organization_id
