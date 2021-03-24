@@ -28,7 +28,7 @@ resource "google_compute_router" "cr_to_mgt_vpc" {
 
 module "vpn_dynamic" {
   source  = "terraform-google-modules/vpn/google"
-  version = "~> 1.2.0"
+  version = "~> 1.5"
 
   project_id         = var.project_id
   network            = var.network
