@@ -16,7 +16,9 @@
 
 # CFT Landing Zone (Migrate for Compute Engine)
 
-Using Cloud Foundation Toolkit (CFT) you can quickly deploy a landing zone for your [Migrate for Compute Engine](https://cloud.google.com/migrate/compute-engine/) migration to Google Cloud Platform (GCP) projects, save time and avoid misconfiguration issues.
+## ⚠ Deprecated
+
+This module has been deprecated. For general guidance on landing zones, please refer to [terraform-example-foundation](https://github.com/terraform-google-modules/terraform-example-foundation).
 
 ## Google Cloud Shell Walkthrough
 A Google Cloud Shell Walkthrough has been setup to make it easy for users who are new to Migrate and Terraform. This walkthrough provides a set of instructions to get a default installation of Migrate setup that can be used in a production environment.
