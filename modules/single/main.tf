@@ -57,7 +57,7 @@ resource "random_string" "suffix" {
 
 module "velos-project" {
   source                  = "terraform-google-modules/project-factory/google"
-  version                 = "~> 5.0"
+  version                 = "~> 10.0"
   name                    = var.project_name == "" ? "velos-core-project-${random_string.suffix.result}" : var.project_name
   org_id                  = var.organization_id
   billing_account         = var.billing_account
@@ -75,7 +75,7 @@ module "velos-project" {
 
 module "vpc" {
   source  = "terraform-google-modules/network/google"
-  version = "~> 1.4.3"
+  version = "~> 3.0"
 
   project_id   = module.velos-project.project_id
   network_name = var.network_name
