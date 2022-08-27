@@ -18,10 +18,9 @@
   Folder Structure
  *****************************************/
 module "migration-folders" {
-  source  = "terraform-google-modules/folders/google"
-  version = "~> 2.0"
-  # parent = "organizations/${var.organization_id}"
-  parent            = "folders/619261348000"
+  source            = "terraform-google-modules/folders/google"
+  version           = "~> 2.0"
+  parent            = var.parent_folder == null ? "organizations/${var.organization_id}" : var.parent_folder
   names             = concat(["shared"], var.environments)
   set_roles         = true
   per_folder_admins = var.per_folder_admins
@@ -33,21 +32,22 @@ module "migration-folders" {
  *****************************************/
 
 module "velos-multi-project" {
-  source             = "../../modules/multi"
-  organization_id    = var.organization_id
-  billing_account    = var.billing_account
-  vpc_folder_id      = split("/", module.migration-folders.ids["shared"])[1]
-  velo_folder_id     = split("/", module.migration-folders.ids["shared"])[1]
-  prod_folder_id     = split("/", module.migration-folders.ids["prod"])[1]
-  nonprod_folder_id  = split("/", module.migration-folders.ids["nonprod"])[1]
-  subnet_01_ip       = var.subnet_01_ip
-  subnet_02_ip       = var.subnet_02_ip
-  subnet_03_ip       = var.subnet_03_ip
-  subnet_01_region   = var.subnet_01_region
-  subnet_02_region   = var.subnet_02_region
-  subnet_03_region   = var.subnet_03_region
-  local_subnet_01_ip = var.local_subnet_01_ip
-
+  source                       = "../../modules/multi"
+  organization_id              = var.organization_id
+  billing_account              = var.billing_account
+  vpc_folder_id                = split("/", module.migration-folders.ids["shared"])[1]
+  velo_folder_id               = split("/", module.migration-folders.ids["shared"])[1]
+  prod_folder_id               = split("/", module.migration-folders.ids["prod"])[1]
+  nonprod_folder_id            = split("/", module.migration-folders.ids["nonprod"])[1]
+  subnet_01_ip                 = var.subnet_01_ip
+  subnet_02_ip                 = var.subnet_02_ip
+  subnet_03_ip                 = var.subnet_03_ip
+  subnet_01_region             = var.subnet_01_region
+  subnet_02_region             = var.subnet_02_region
+  subnet_03_region             = var.subnet_03_region
+  local_subnet_01_ip           = var.local_subnet_01_ip
+  velostrata_vm_password       = var.velostrata_vm_password
+  velostrata_vm_encryption_key = var.velostrata_vm_encryption_key
 }
 /*****************************************
   VPN

@@ -28,11 +28,29 @@ output "network_self_link" {
   value       = module.vpc.network_self_link
   description = "The URI of the VPC being created"
 }
+
 output "velos_migration_manager_svc" {
   value       = google_service_account.velos-manager.email
   description = "Service account for Manager Service"
 }
+
 output "velos_compute_engine_cloud_extension_svc" {
   value       = google_service_account.velos-cloud-extension.email
   description = "Service account for Compute Engine Cloud Extension"
+}
+
+output "velos_vm_ui" {
+  value       = module.velos-manager-vm.velos_vm_ui
+  description = "URL for Velostrata Manger"
+}
+
+output "velos_manager_username" {
+  value       = module.velos-manager-vm.velos_manager_username
+  description = "Username for Velostrata Manger"
+}
+
+output "velos_manager_password" {
+  value       = module.velos-manager-vm.velos_manager_password
+  sensitive   = true
+  description = "Password for Velostrata Manger"
 }

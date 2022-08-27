@@ -99,3 +99,31 @@ variable "local_subnet_01_ip" {
   description = "IP range of the on-prem network"
   #default    = ""
 }
+
+variable "velostrata_vm_name" {
+  description = "Name for the VM velostrata manager is deployed"
+  default     = "velostrata-tf-vm"
+}
+
+variable "velostrata_vm_zone" {
+  description = "Zone for the VM velostrata manager is deployed in"
+  default     = "us-central1-a"
+}
+
+variable "velostrata_vm_machine_type" {
+  description = "Machine Type for velostrata manager VM"
+  default     = "n1-standard-4"
+}
+
+variable "velostrata_vm_tags" {
+  description = "Tags for velostrata vm. fw-velosmanager is added automatically"
+  default     = []
+}
+
+variable "velostrata_vm_password" {
+  description = "Password to login for Velostrata Frontend"
+}
+
+variable "velostrata_vm_encryption_key" {
+  description = "Encryption key for Velostrata Frontend"
+}
